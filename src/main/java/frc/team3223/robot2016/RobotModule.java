@@ -16,10 +16,12 @@ public class RobotModule extends IterativeModule {
     Talon[] talons;
     Joystick leftJoystick;
     Joystick rightJoystick;
-
+    boolean isbuttonpressed;
     RobotDrive drive;
 
     int i;
+    boolean normaljoystickorentation;
+
 
     @Override
     public String getModuleName() {
@@ -42,14 +44,35 @@ public class RobotModule extends IterativeModule {
         }
         leftJoystick = new Joystick(1);
         rightJoystick = new Joystick(0);
+        isbuttonpressed = false;
         drive = new RobotDrive(talons[0], talons[1], talons[2], talons[3]);
+        normaljoystickorentation = true;
     }
 
     @Override
     public void teleopPeriodic() {
-        networkTable.putNumber("y", i);
-        i++;
-        drive.tankDrive(leftJoystick, rightJoystick);
+        if(isbuttonpressed == false && leftJoystick.getRawButton(3));
+        {
+            normaljoystickorentation=!normaljoystickorentation;
+            isbuttonpressed=true;
+        }
+        if (isbuttonpressed == true && leftJoystick.getRawButton(3)== false)
+        {
+            isbuttonpressed = false;
+
+        }
+
+        double leftvalue = leftJoystick.getAxis(Joystick.AxisType.kY)/2;
+        double rightvalue = rightJoystick.getAxis(Joystick.AxisType.kY)/2;
+        if( Math.abs(leftvalue - rightvalue) <= 0.2)
+        {
+            leftvalue = rightvalue;
+        }
+        if(!normaljoystickorentation){
+            leftvalue=-leftvalue;
+            rightvalue=-rightvalue;
+        }
+        drive.tankDrive(leftvalue, rightvalue, true);
     }
 
 }
