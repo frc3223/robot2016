@@ -1,10 +1,13 @@
-bin/
-build/
-dist/
-run/
-.gradle/
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.AppleDouble
+.LSOverride
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-*.ipr
-*.iml
-*.iws
-
+# backup files
+*~
