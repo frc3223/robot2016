@@ -39,4 +39,6 @@ configurations {
 
 dependencies {
     compile group: 'jaci.openrio.toast', name: 'Toast', version: '+'
+    compile fileTree(dir: '../libs/', include: 'navx_frc.jar')
+    toastLibrary fileTree(dir: '../libs/', include: 'navx_frc.jar')
 }
