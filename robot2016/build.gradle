@@ -23,6 +23,7 @@ apply plugin: 'maven'
 apply plugin: 'GradleRIO'                                 //Apply the GradleRIO plugin
 
 repositories {
+  mavenLocal()
   maven {
     name = "Toast"
     url = "http://dev.imjac.in/maven"
@@ -39,6 +40,9 @@ configurations {
 
 dependencies {
     compile group: 'jaci.openrio.toast', name: 'Toast', version: '+'
-    compile fileTree(dir: '../libs/', include: 'navx_frc.jar')
-    toastLibrary fileTree(dir: '../libs/', include: 'navx_frc.jar')
+    compile fileTree(dir: '../libs', include: '*.jar')
+    toastLibrary fileTree(dir: '../libs/', include: '*.jar')
+
+    testCompile 'junit:junit:4.12'
 }
+
