@@ -1,4 +1,4 @@
-package frc.team3223.robot2016;
+package frc.team3223.drive;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
@@ -7,9 +7,10 @@ import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
 
 /* thieverized from navx example rotate to angle */
-public class RotateToAngle implements ITableListener, PIDOutput{
+public class RotateToAngle implements ITableListener, PIDOutput, IDrive{
 
     PIDController turnController;
+    private SimpleDrive simpleDrive;
     double rotateToAngleRate;
 
     /* The following PID Controller coefficients will need to be tuned */
@@ -28,7 +29,8 @@ public class RotateToAngle implements ITableListener, PIDOutput{
 
     double desiredHeading = 0.0;
 
-    public RotateToAngle(PIDSource gyro) {
+    public RotateToAngle(PIDSource gyro, SimpleDrive simpleDrive) {
+        this.simpleDrive = simpleDrive;
 
         turnController = new PIDController(kP, kI, kD, kF, gyro, this);
         turnController.setInputRange(-180.0f, 180.0f);
@@ -36,7 +38,6 @@ public class RotateToAngle implements ITableListener, PIDOutput{
         turnController.setAbsoluteTolerance(kToleranceDegrees);
         turnController.setContinuous(true);
         turnController.setSetpoint(desiredHeading);
-        //turnController.enable();
     }
 
     @Override
@@ -65,10 +66,20 @@ public class RotateToAngle implements ITableListener, PIDOutput{
     }
 
     public void enable() {
+        simpleDrive.enable();
         turnController.enable();
     }
 
     public void disable() {
+
+        simpleDrive.disable();
         turnController.disable();
+    }
+
+
+    public void rotate() {
+        double left = getRotateToAngleRate();
+        double right = -left;
+        simpleDrive.drive(left, right);
     }
 }

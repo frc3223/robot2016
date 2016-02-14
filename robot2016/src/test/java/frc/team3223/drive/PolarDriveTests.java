@@ -1,8 +1,6 @@
-package frc.team3223.polardrive;
+package frc.team3223.drive;
 
-import frc.team3223.util.Pair;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class PolarDriveTests {
 
@@ -10,6 +8,7 @@ public class PolarDriveTests {
         Assert.assertEquals(expected, actual, 0.0001);
     }
 
+    /*
     @Test
     public void testNormalizeDegrees() {
         assertAlmostEqual(0.0, PolarTankDrive.normalizeDegrees(0.));
@@ -73,4 +72,5 @@ public class PolarDriveTests {
         double rightThrust = pair.fst;
         assertAlmostEqual(expectedRightThrust, rightThrust);
     }
+    */
 }

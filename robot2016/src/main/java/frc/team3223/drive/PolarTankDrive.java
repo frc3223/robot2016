@@ -1,6 +1,8 @@
-package frc.team3223.polardrive;
+package frc.team3223.drive;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.MotorSafety;
+import edu.wpi.first.wpilibj.MotorSafetyHelper;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -10,17 +12,26 @@ import jaci.openrio.toast.lib.log.Logger;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-public class PolarTankDrive {
+/**
+ * Polar Tank Drive does several things:
+ * 1. translate polar radius and angle to tank drive thrusts
+ * 2. translate joystick inputs to polar radius and angle
+ * 3. Field Centric control - e.g. push down on joystick means
+ *    robot drives toward the operator end of the arena
+ * 4. Turn threshold - when the robot's heading is within this
+ *    distance of the desired heading, turn robot while moving forward,
+ *    otherwise rotate the robot in place.
+ */
+public class PolarTankDrive implements IDrive, MotorSafety {
 
     public static Logger logger;
+    protected MotorSafetyHelper m_safetyHelper;
     private NetworkTable networkTable;
     private Gyro gyro;
+    private IDriveProvider driveProvider;
 
     private Joystick directionJoystick;
     private Supplier<Double> thrustAxis;
-
-    private ArrayList<SpeedController> rightMotors;
-    private ArrayList<SpeedController> leftMotors;
 
     /**
      * err, what's this?
@@ -32,20 +43,20 @@ public class PolarTankDrive {
      * drive forward and turn rather than rotate in place.
      */
     private double rotateThreshold;
+    public final static double kDefaultExpirationTime = 0.1;
 
-    public PolarTankDrive(Gyro gyro) {
+    public PolarTankDrive(Gyro gyro, IDriveProvider driveProvider) {
         this.gyro = gyro;
+        this.driveProvider = driveProvider;
         this.rotateThreshold = 10;
-        this.rightMotors = new ArrayList<SpeedController>(2);
-        this.leftMotors = new ArrayList<SpeedController>(2);
+        setupMotorSafety();
+        disable();
     }
 
-    public void addRightMotor(SpeedController speedController) {
-        this.rightMotors.add(speedController);
-    }
-
-    public void addLeftMotor(SpeedController speedController) {
-        this.leftMotors.add(speedController);
+    private void setupMotorSafety() {
+        m_safetyHelper = new MotorSafetyHelper(this);
+        m_safetyHelper.setExpiration(kDefaultExpirationTime);
+        m_safetyHelper.setSafetyEnabled(true);
     }
 
     public void takeInitialHeading() {
@@ -100,14 +111,16 @@ public class PolarTankDrive {
         final Pair<Double, Double> speed = tankSpeeds(
                 thrust, heading, gyro.getAngle(), getRotateThreshold());
 
-        leftMotors.forEach(sc -> {
+        driveProvider.getLeftMotors().forEachRemaining(sc -> {
             sc.setInverted(true);
             sc.set(speed.fst);
         });
-        rightMotors.forEach(sc -> {
+        driveProvider.getRightMotors().forEachRemaining(sc -> {
             sc.setInverted(false);
             sc.set(speed.snd);
         });
+
+        m_safetyHelper.feed();
     }
 
     public Joystick getDirectionJoystick() {
@@ -160,5 +173,52 @@ public class PolarTankDrive {
     public static double drivingTriangle(final double theta) {
         final double c = theta / 360;
         return 8 * Math.abs(c - Math.floor(c + 0.5)) - 2;
+    }
+
+    @Override
+    public void enable() {
+        m_safetyHelper.setSafetyEnabled(true);
+    }
+
+    @Override
+    public void disable() {
+        m_safetyHelper.setSafetyEnabled(false);
+
+    }
+
+    @Override
+    public void setExpiration(double timeout) {
+        m_safetyHelper.setExpiration(timeout);
+
+    }
+
+    @Override
+    public double getExpiration() {
+        return m_safetyHelper.getExpiration();
+    }
+
+    @Override
+    public boolean isAlive() {
+        return m_safetyHelper.isAlive();
+    }
+
+    @Override
+    public void stopMotor() {
+        drive(0, 0);
+    }
+
+    @Override
+    public void setSafetyEnabled(boolean enabled) {
+        m_safetyHelper.setSafetyEnabled(enabled);
+    }
+
+    @Override
+    public boolean isSafetyEnabled() {
+        return m_safetyHelper.isSafetyEnabled();
+    }
+
+    @Override
+    public String getDescription() {
+        return "Polar Field Centric Tank Drive";
     }
 }
