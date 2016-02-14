@@ -158,7 +158,14 @@ public class PolarTankDrive implements IDrive, MotorSafety {
     }
 
     public static double normalizeDegrees(double angle) {
-        return (angle + 180) % 360 - 180;
+        double result = (angle ) % 360 ;
+        if(result < -180) {
+            result += 360;
+        }
+        if(result >= 180) {
+            result -= 360;
+        }
+        return result;
     }
 
     public static Pair<Double, Double> polarToThrust(final double θ, final double power) {
@@ -172,7 +179,9 @@ public class PolarTankDrive implements IDrive, MotorSafety {
 
     public static double drivingTriangle(final double theta) {
         final double c = theta / 360;
-        return 8 * Math.abs(c - Math.floor(c + 0.5)) - 2;
+        final double sawtooth = c - Math.floor(c + 0.5);
+        final double result = 8 * Math.abs(sawtooth) - 2;
+        return result;
     }
 
     @Override
