@@ -3,6 +3,7 @@ package frc.team3223.robot2016;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
+import frc.team3223.autonomous.IAutonomous;
 import frc.team3223.drive.*;
 import frc.team3223.navx.INavX;
 import frc.team3223.navx.NavXRegistrar;
@@ -18,7 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class RobotModule extends IterativeModule implements ITableListener, IDriveProvider{
+public class RobotModule extends IterativeModule implements ITableListener, ISpeedControllerProvider {
 
     public static Logger logger;
 
@@ -33,6 +34,7 @@ public class RobotModule extends IterativeModule implements ITableListener, IDri
     RotateToAngle rotateToAngle;
     Map<DriveMode, IDrive> driveModes;
     INavX navX;
+    Map<AutonomousMode, IAutonomous> autonomousModes;
 
     Shooter shooter;
     ArrayList<ToggleButton> toggleButtons;
@@ -57,6 +59,7 @@ public class RobotModule extends IterativeModule implements ITableListener, IDri
         networkTable.addTableListener(this);
         toggleButtons = new ArrayList<>();
         driveModes = new HashMap<>();
+        autonomousModes = new HashMap<>();
 
         initTalons();
         initJoysticks();
@@ -143,6 +146,12 @@ public class RobotModule extends IterativeModule implements ITableListener, IDri
     private void disableDriveModes() {
         driveModes.values().forEach(dr -> {
             dr.disable();
+        });
+    }
+
+    private void disableAutonomousModes() {
+        autonomousModes.values().forEach(au -> {
+            au.disable();
         });
     }
 

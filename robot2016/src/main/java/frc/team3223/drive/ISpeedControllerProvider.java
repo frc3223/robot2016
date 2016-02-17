@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.SpeedController;
 
 import java.util.Iterator;
 
-public interface IDriveProvider {
+public interface ISpeedControllerProvider {
     Iterator<SpeedController> getLeftMotors();
     Iterator<SpeedController> getRightMotors();
 

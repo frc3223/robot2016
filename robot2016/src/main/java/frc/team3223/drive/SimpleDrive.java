@@ -39,7 +39,7 @@ public class SimpleDrive implements IDrive{
     private Joystick leftJoystick;
     private Joystick rightJoystick;
 
-    public SimpleDrive(Joystick leftJoystick, Joystick rightJoystick, IDriveProvider driveProvider, NetworkTable networkTable) {
+    public SimpleDrive(Joystick leftJoystick, Joystick rightJoystick, ISpeedControllerProvider driveProvider, NetworkTable networkTable) {
         this.leftJoystick = leftJoystick;
         this.rightJoystick = rightJoystick;
         this.networkTable = networkTable;

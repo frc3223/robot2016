@@ -3,18 +3,17 @@ package frc.team3223.drive;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.MotorSafety;
 import edu.wpi.first.wpilibj.MotorSafetyHelper;
-import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import frc.team3223.util.Pair;
 import jaci.openrio.toast.lib.log.Logger;
 
-import java.util.ArrayList;
 import java.util.function.Supplier;
 
 /**
  * Polar Tank Drive does several things:
  * 1. translate polar radius and angle to tank drive thrusts
+ *    (algorithm stolen from http://robotics.stackexchange.com/questions/2011/how-to-calculate-the-right-and-left-speed-for-a-tank-like-rover/2016#2016)
  * 2. translate joystick inputs to polar radius and angle
  * 3. Field Centric control - e.g. push down on joystick means
  *    robot drives toward the operator end of the arena
@@ -28,7 +27,7 @@ public class PolarTankDrive implements IDrive, MotorSafety {
     protected MotorSafetyHelper m_safetyHelper;
     private NetworkTable networkTable;
     private Gyro gyro;
-    private IDriveProvider driveProvider;
+    private ISpeedControllerProvider driveProvider;
 
     private Joystick directionJoystick;
     private Supplier<Double> thrustAxis;
@@ -45,7 +44,7 @@ public class PolarTankDrive implements IDrive, MotorSafety {
     private double rotateThreshold;
     public final static double kDefaultExpirationTime = 0.1;
 
-    public PolarTankDrive(Gyro gyro, IDriveProvider driveProvider) {
+    public PolarTankDrive(Gyro gyro, ISpeedControllerProvider driveProvider) {
         this.gyro = gyro;
         this.driveProvider = driveProvider;
         this.rotateThreshold = 10;
