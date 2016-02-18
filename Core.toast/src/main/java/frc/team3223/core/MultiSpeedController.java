@@ -1,6 +1,6 @@
-package frc.team3223.util;
+package frc.team3223.core;
 
-import frc.team3223.util.Pair;
+import frc.team3223.core.Pair;
 import java.util.ArrayList;
 import java.util.List;
 

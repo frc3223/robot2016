@@ -1,0 +1,3 @@
+include ":Core.toast"
+
+project(":Core.toast").projectDir = file("../Core.toast")

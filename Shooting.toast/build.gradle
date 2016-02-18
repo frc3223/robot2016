@@ -35,5 +35,6 @@ gradlerio.deployFile = "toast/modules/${archivesBaseName}.jar"
 
 dependencies {
   compile group: 'jaci.openrio.toast', name: 'Toast', version: '+'    //Change this line to update Toast
-  compile fileTree(dir: '../Util.toast/build/libs', include: '*.jar')
+  compile project(":Core.toast")
+  toastModule project(":Core.toast")
 }

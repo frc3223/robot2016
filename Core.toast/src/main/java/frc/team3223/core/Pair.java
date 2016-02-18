@@ -1,4 +1,4 @@
-package frc.team3223.util;
+package frc.team3223.core;
 
 public class Pair<A, B> {
     public A fst;

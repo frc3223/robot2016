@@ -3,8 +3,7 @@ package frc.team3223.shooting;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import frc.team3223.util.MultiSpeedController;
-import frc.team3223.util.RelayRegistrar;
+import frc.team3223.core.MultiSpeedController;
 import jaci.openrio.toast.lib.log.Logger;
 import jaci.openrio.toast.lib.module.IterativeModule;
 import jaci.openrio.toast.lib.registry.Registrar;
@@ -36,8 +35,8 @@ public class Shooting extends IterativeModule {
         logger = new Logger("Shooting", Logger.ATTR_DEFAULT);
         networkTable = NetworkTable.getTable("SmartDashboard");
         shooter = new MultiSpeedController().add(Registrar.talon(4)).add(Registrar.talon(5), -1.0);
-        pitchers = Arrays.asList(pitcherRight = RelayRegistrar.relay(0),
-            pitcherLeft = RelayRegistrar.relay(1));
+        pitchers = Arrays.asList(pitcherRight = Registrar.relay(0),
+            pitcherLeft = Registrar.relay(1));
     }
 
     @Override

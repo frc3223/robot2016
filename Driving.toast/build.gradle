@@ -5,11 +5,11 @@ This is the default build.gradle for Toast modules
 
 buildscript {
   repositories {
-  mavenCentral()
-  maven {
-    name = "GradleRIO"
-    url = "http://dev.imjac.in/maven"
-  }
+    mavenCentral()
+    maven {
+      name = "GradleRIO"
+      url = "http://dev.imjac.in/maven"
+    }
   }
   dependencies {
     classpath group: 'jaci.openrio.gradle', name: 'GradleRIO', version: '+', classifier: 'Toast'			//Change this line if you wish to Update GradleRIO
@@ -33,9 +33,9 @@ gradlerio.team = "3223"                                 //Your FRC team number (
 //gradlerio.rioIP = "10.53.33.20"                         //Uncomment to specify the IP address of the RIO
 gradlerio.deployFile = "toast/modules/${archivesBaseName}.jar"
 
+
 dependencies {
   compile group: 'jaci.openrio.toast', name: 'Toast', version: '+'    //Change this line to update Toast
-  compile fileTree(dir: '../NavX.toast/libs', include: '*.jar')
-  compile fileTree(dir: '../NavX.toast/build/libs', include: '*.jar')
-  compile fileTree(dir: '../Util.toast/build/libs', include: '*.jar')
+  compile project(":Core.toast")
+  toastModule project(":Core.toast")
 }

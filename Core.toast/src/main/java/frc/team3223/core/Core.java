@@ -1,12 +1,12 @@
-package frc.team3223.util;
+package frc.team3223.core;
 
 import jaci.openrio.toast.lib.module.ToastModule;
 
-public class Util extends ToastModule {
+public class Core extends ToastModule {
 
     @Override
     public String getModuleName() {
-        return "Util";
+        return "Core";
     }
 
     @Override
