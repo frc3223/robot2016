@@ -207,7 +207,7 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
     }
 
     @Override public void teleopInit() {
-        pushDriveMode(DriveMode.PolarFCTank);
+        pushDriveMode(DriveMode.SimpleTank);
     }
 
     @Override
@@ -216,6 +216,7 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
         toggleButtons.forEach(tb -> tb.teleopPeriodic());
 
         shooter.teleopPeriodic();
+
         switch(driveMode) {
             case SimpleTank:
                 simpleDrive.drive();
@@ -227,6 +228,7 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
                 ptDrive.driveSingle();
                 break;
         }
+
     }
 
 

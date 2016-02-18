@@ -14,8 +14,11 @@ public class Shooter implements ITableListener {
     private int slurpButton;
     private Talon leftShooterTalon;
     private Talon rightShooterTalon;
+    private Talon rollerTalon;
+    private Talon leftWindowMotorTalon;
+    private Talon rightWindowMotorTalon;
 
-    public double slurpSpeed = 0.25;
+    public double slurpSpeed = .78;
     public double slurpDirection = 1;
     public double shootSpeed = 1;
     public double shootDirection = -1;
@@ -25,9 +28,9 @@ public class Shooter implements ITableListener {
     double arm_pitch_down_speed = 0.25;
     double arm_pitch_down_dir = 1;
 
-    double arm_roller_out_speed = 0.25;
+    double arm_roller_out_speed = 1;
     double arm_roller_out_dir = -1;
-    double arm_roller_in_speed = 0.25;
+    double arm_roller_in_speed = 1;
     double arm_roller_in_dir = 1;
 
 
@@ -40,6 +43,9 @@ public class Shooter implements ITableListener {
         this.slurpButton = slurpButton;
         this.leftShooterTalon = Registrar.talon(4);
         this.rightShooterTalon = Registrar.talon(5);
+        this.rollerTalon = Registrar.talon(6);
+        this.leftWindowMotorTalon = Registrar.talon(7);
+        this.rightWindowMotorTalon = Registrar.talon(8);
     }
 
     public void teleopPeriodic() {
@@ -69,11 +75,13 @@ public class Shooter implements ITableListener {
     public void slurp() {
         leftShooterTalon.set(getSlurpSpeed());
         rightShooterTalon.set(-getSlurpSpeed());
+        rollerTalon.set(getRollerSlurpSpeed());
     }
 
     public void stop() {
         rightShooterTalon.set(0.);
         leftShooterTalon.set(0.);
+        rollerTalon.set(0.);
     }
 
     public double getShootSpeed() {
@@ -83,6 +91,10 @@ public class Shooter implements ITableListener {
     public double getSlurpSpeed() {
         return Math.copySign(slurpSpeed, slurpDirection);
 
+    }
+
+    public double getRollerSlurpSpeed() {
+        return Math.copySign(arm_roller_in_speed, arm_roller_in_dir);
     }
 
     public double getArmPitchUpSpeed() {
@@ -149,25 +161,13 @@ public class Shooter implements ITableListener {
         System.out.println("yup didn't actually do that");
     }
 
-    /*
-    public void armPitch() {
-        if(leftJoystick.getRawButton(3)) {
-            talons[4].set(getArmPitchUpSpeed());
-        }else if(rightJoystick.getRawButton(3)) {
-            talons[4].set(getArmPitchDownSpeed());
-        }else {
-            talons[4].set(0.);
-        }
+    public void raiseShooter() {
+        leftWindowMotorTalon.set(.25);
+        rightWindowMotorTalon.set(-.25);
     }
 
-    public void armRoller() {
-        if(leftJoystick.getRawButton(2)) {
-            talons[5].set(getArmRollerOutSpeed());
-        }else if(rightJoystick.getRawButton(2)) {
-            talons[5].set(getArmRollerInSpeed());
-        }else {
-            talons[5].set(0.);
-        }
+    public void lowerShooter() {
+        leftWindowMotorTalon.set(-.25);
+        rightWindowMotorTalon.set(.25);
     }
-    */
 }
