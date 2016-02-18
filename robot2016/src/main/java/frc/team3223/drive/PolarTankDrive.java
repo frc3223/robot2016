@@ -149,10 +149,10 @@ public class PolarTankDrive implements IDrive, MotorSafety {
     public static Pair<Double, Double> tankSpeeds(final double power,
             final double desiredHeading, final double currentHeading,
             final double rotateThreshold) {
-        final double θRelative = normalizeDegrees(desiredHeading - currentHeading);
+        final double thetaRelative = normalizeDegrees(desiredHeading - currentHeading);
         final double heading = Math.copySign(
-            (Math.abs(θRelative) <= rotateThreshold) ? rotateThreshold : 180,
-            θRelative);
+            (Math.abs(thetaRelative) <= rotateThreshold) ? rotateThreshold : 180,
+            thetaRelative);
         return polarToThrust(heading, power);
     }
 
@@ -167,9 +167,9 @@ public class PolarTankDrive implements IDrive, MotorSafety {
         return result;
     }
 
-    public static Pair<Double, Double> polarToThrust(final double θ, final double power) {
-        double left = power * drivingTriangle(θ + 135);
-        double right = power * drivingTriangle(θ - 135);
+    public static Pair<Double, Double> polarToThrust(final double theta, final double power) {
+        double left = power * drivingTriangle(theta + 135);
+        double right = power * drivingTriangle(theta - 135);
         return new Pair<>(
             Math.max(-1, Math.min(1, left)),
             Math.max(-1, Math.min(1, right))

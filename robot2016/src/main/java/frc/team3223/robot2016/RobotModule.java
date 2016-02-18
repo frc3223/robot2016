@@ -3,6 +3,7 @@ package frc.team3223.robot2016;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
+import frc.team3223.autonomous.DriveToHighGoal;
 import frc.team3223.autonomous.IAutonomous;
 import frc.team3223.drive.*;
 import frc.team3223.navx.INavX;
@@ -35,6 +36,8 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
     Map<DriveMode, IDrive> driveModes;
     INavX navX;
     Map<AutonomousMode, IAutonomous> autonomousModes;
+    DriveToHighGoal driveToHighGoal;
+    AutonomousMode currentAutonomousMode;
 
     Shooter shooter;
     ArrayList<ToggleButton> toggleButtons;
@@ -60,6 +63,7 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
         toggleButtons = new ArrayList<>();
         driveModes = new HashMap<>();
         autonomousModes = new HashMap<>();
+        currentAutonomousMode = AutonomousMode.DriveToHighGoal;
 
         initTalons();
         initJoysticks();
@@ -68,7 +72,14 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
         initSimpleDrive();
         initRotateToAngle();
         initPolarDrive();
+        initDriveToHighGoal();
 
+    }
+
+    private void initDriveToHighGoal() {
+        this.driveToHighGoal = new DriveToHighGoal(1, ptDrive, 1);
+        driveToHighGoal.disable();
+        autonomousModes.put(AutonomousMode.DriveToHighGoal, driveToHighGoal);
     }
 
     private void initShooter() {
@@ -189,6 +200,10 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
         talons.forEach(talon -> {
             talon.Feed();
         });
+
+        if (currentAutonomousMode == AutonomousMode.DriveToHighGoal) {
+            this.driveToHighGoal.autonomousPeriodic();
+        }
     }
 
     @Override public void teleopInit() {

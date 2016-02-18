@@ -2,7 +2,7 @@ package frc.team3223.autonomous;
 
 public interface IAutonomous {
     void autonomousInit();
-    void autonomousPeridic();
+    void autonomousPeriodic();
     void enable();
     void disable();
 }
