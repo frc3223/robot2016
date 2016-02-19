@@ -35,7 +35,8 @@ public class Shooter implements ITableListener {
 
 
     public Shooter(Joystick shootJoystick, int shootButton,
-                   Joystick slurpJoystick, int slurpButton ) {
+                   Joystick slurpJoystick, int slurpButton,
+		   			Joystick shooterControlStick, int shooterUpButton, int shooterDownButton) {
 
         this.shootJoystick = shootJoystick;
         this.shootButton = shootButton;
@@ -53,7 +54,11 @@ public class Shooter implements ITableListener {
             shoot();
         } else if (shouldSlurp()) {
             slurp();
-        } else {
+		} else if (shooterControlStick.getRawButton(shooterUpButton)){
+			raiseShooter();
+		} else if (shooterControlStick.getRawButton(shooterDownButton)){
+			lowerShooter();
+		} else {
             stop();
         }
     }
@@ -65,6 +70,10 @@ public class Shooter implements ITableListener {
     public boolean shouldSlurp() {
         return slurpJoystick.getRawButton(slurpButton);
     }
+
+	public boolean shouldMoveShooter(){
+		
+	}
 
     public void shoot() {
         leftShooterTalon.set(getShootSpeed());

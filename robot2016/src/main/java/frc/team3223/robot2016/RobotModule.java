@@ -83,7 +83,7 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
     }
 
     private void initShooter() {
-        shooter = new Shooter(leftJoystick, 3, rightJoystick, 3);
+        shooter = new Shooter(leftJoystick, 3, rightJoystick, 3 ,rightJoystick, 4, 5);
         networkTable.addTableListener(shooter);
     }
 
@@ -98,7 +98,7 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
 
     private void initSimpleDrive() {
         simpleDrive = new SimpleDrive(leftJoystick,rightJoystick, this, networkTable );
-        toggleButtons.add(new ToggleButton(leftJoystick, 4)
+        toggleButtons.add(new ToggleButton(leftJoystick, 8)
                 .onToggleOn(x -> {
                     simpleDrive.toggleNormalJoystickOrientation();
                 }));
