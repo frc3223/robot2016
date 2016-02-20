@@ -22,11 +22,17 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private int slurpButton = 3;
     private int shooterUpButton = 4;
     private int shooterDownButton = 5;
+    private Talon leftShooterTalon;
+    private Talon rightShooterTalon;
+    private Talon rollerTalon;
+    private Talon leftWindowMotorTalon;
+    private Talon rightWindowMotorTalon;
 
     public RobotConfiguration(NetworkTable networkTable){
         this.networkTable = networkTable;
         initTalons();
         initJoysticks();
+        initShooter();
     }
 
     public void publishJoystickConfiguration(){
@@ -77,6 +83,14 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         });
     }
 
+    public void initShooter(){
+        this.leftShooterTalon = Registrar.talon(4);
+        this.rightShooterTalon = Registrar.talon(5);
+        this.rollerTalon = Registrar.talon(6);
+        this.leftWindowMotorTalon = Registrar.talon(7);
+        this.rightWindowMotorTalon = Registrar.talon(8);
+    }
+
     @Override
     public Iterator<SpeedController> getLeftMotors() {
         ArrayList<SpeedController> grr = new ArrayList<>(2);
@@ -113,4 +127,23 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         return talons.get(3);
     }
 
+    public Talon getLeftShooterTalon() {
+        return leftShooterTalon;
+    }
+
+    public Talon getRightShooterTalon() {
+        return rightShooterTalon;
+    }
+
+    public Talon getRollerTalon() {
+        return rollerTalon;
+    }
+
+    public Talon getLeftWindowMotorTalon() {
+        return leftWindowMotorTalon;
+    }
+
+    public Talon getRightWindowMotorTalon() {
+        return rightWindowMotorTalon;
+    }
 }

@@ -1,19 +1,10 @@
 package frc.team3223.robot2016;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
-import jaci.openrio.toast.lib.registry.Registrar;
 
 public class Shooter implements ITableListener {
-
-
-    private Talon leftShooterTalon;
-    private Talon rightShooterTalon;
-    private Talon rollerTalon;
-    private Talon leftWindowMotorTalon;
-    private Talon rightWindowMotorTalon;
 
     public double slurpSpeed = .78;
     public double slurpDirection = 1;
@@ -29,35 +20,22 @@ public class Shooter implements ITableListener {
     double arm_roller_out_dir = -1;
     double arm_roller_in_speed = 1;
     double arm_roller_in_dir = 1;
-    private RobotConfiguration configuration;
+    private RobotConfiguration conf;
 
 
-    public Shooter(RobotConfiguration configuration) {
+    public Shooter(RobotConfiguration conf) {
 
-       /*this.shootJoystick = shootJoystick;
-        this.shootButton = shootButton;
-        this.slurpJoystick = slurpJoystick;
-        this.slurpButton = slurpButton;
-        this.shooterControlStick = shooterControlStick;
-        this.shooterUpButton = shooterUpButton;
-        this.shooterDownButton = shooterDownButton;
-        this.leftShooterTalon = Registrar.talon(4);
-        this.rightShooterTalon = Registrar.talon(5);
-        this.rollerTalon = Registrar.talon(6);
-        this.leftWindowMotorTalon = Registrar.talon(7);
-        this.rightWindowMotorTalon = Registrar.talon(8);
-        */
-        this.configuration = configuration;
+        this.conf = conf;
     }
 
     public void teleopPeriodic() {
-        if (configuration.shouldShoot()) {
+        if (conf.shouldShoot()) {
             shoot();
-        } else if (configuration.shouldSlurp()) {
+        } else if (conf.shouldSlurp()) {
             slurp();
-		} else if (configuration.shouldAimUp()){
+		} else if (conf.shouldAimUp()){
 			raiseShooter();
-		} else if (configuration.shouldAimDown()){
+		} else if (conf.shouldAimDown()){
 			lowerShooter();
 		} else {
             stop();
@@ -69,21 +47,21 @@ public class Shooter implements ITableListener {
 	}
 
     public void shoot() {
-        leftShooterTalon.set(getShootSpeed());
-        rightShooterTalon.set(-getShootSpeed());
+        conf.getLeftShooterTalon().set(getShootSpeed());
+        conf.getRightShooterTalon().set(-getShootSpeed());
 
     }
 
     public void slurp() {
-        leftShooterTalon.set(getSlurpSpeed());
-        rightShooterTalon.set(-getSlurpSpeed());
-        rollerTalon.set(getRollerSlurpSpeed());
+        conf.getLeftShooterTalon().set(getSlurpSpeed());
+        conf.getRightShooterTalon().set(-getSlurpSpeed());
+        conf.getRollerTalon().set(getRollerSlurpSpeed());
     }
 
     public void stop() {
-        rightShooterTalon.set(0.);
-        leftShooterTalon.set(0.);
-        rollerTalon.set(0.);
+        conf.getRightShooterTalon().set(0.);
+        conf.getLeftShooterTalon().set(0.);
+        conf.getRollerTalon().set(0.);
     }
 
     public double getShootSpeed() {
@@ -164,12 +142,12 @@ public class Shooter implements ITableListener {
     }
 
     public void raiseShooter() {
-        leftWindowMotorTalon.set(.25);
-        rightWindowMotorTalon.set(-.25);
+        conf.getLeftWindowMotorTalon().set(.25);
+        conf.getRightWindowMotorTalon().set(-.25);
     }
 
     public void lowerShooter() {
-        leftWindowMotorTalon.set(-.25);
-        rightWindowMotorTalon.set(.25);
+        conf.getLeftWindowMotorTalon().set(-.25);
+        conf.getRightWindowMotorTalon().set(.25);
     }
 }
