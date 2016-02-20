@@ -3,6 +3,7 @@ package frc.team3223.drive;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import frc.team3223.robot2016.RobotConfiguration;
 
 /**
  * silly wrapper around silly RobotDrive class.
@@ -39,15 +40,15 @@ public class SimpleDrive implements IDrive{
     private Joystick leftJoystick;
     private Joystick rightJoystick;
 
-    public SimpleDrive(Joystick leftJoystick, Joystick rightJoystick, ISpeedControllerProvider driveProvider, NetworkTable networkTable) {
-        this.leftJoystick = leftJoystick;
-        this.rightJoystick = rightJoystick;
+    public SimpleDrive(RobotConfiguration conf, NetworkTable networkTable) {
+        this.leftJoystick = conf.getLeftJoystick();
+        this.rightJoystick = conf.getRightJoystick();
         this.networkTable = networkTable;
         drive = new RobotDrive(
-                driveProvider.getFrontLeftTalon(),
-                driveProvider.getRearLeftTalon(),
-                driveProvider.getFrontRightTalon(),
-                driveProvider.getRearRightTalon());
+                conf.getFrontLeftTalon(),
+                conf.getRearLeftTalon(),
+                conf.getFrontRightTalon(),
+                conf.getRearRightTalon());
 
         setMaxSpeedModifier(0.85);
         setEqualizeThreshold(0.5);

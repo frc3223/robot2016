@@ -17,8 +17,8 @@ public class ToggleButton {
     private Joystick joystick;
     private int button;
     private boolean wasButtonPressed;
-    private Consumer<Integer> onToggle;
-    private Consumer<Integer> offToggle;
+    private ToggleAction onToggle = null;
+    private ToggleAction offToggle = null;
 
     public ToggleButton(Joystick joystick, int button) {
         this.joystick = joystick;
@@ -26,24 +26,29 @@ public class ToggleButton {
         wasButtonPressed = false;
     }
 
-    public ToggleButton onToggleOn(Consumer<Integer> onToggle) {
+    public ToggleButton onToggleOn(ToggleAction onToggle) {
         this.onToggle = onToggle;
         return this;
     }
-    public ToggleButton onToggleOff(Consumer<Integer> offToggle) {
+    public ToggleButton onToggleOff(ToggleAction offToggle) {
         this.offToggle = offToggle;
         return this;
     }
 
-    public void teleopPeriodic() {
+    public void periodic() {
 
         if(!wasButtonPressed && joystick.getRawButton(button))
         {
-            this.onToggle.accept(1);
+            if(onToggle != null) {
+                this.onToggle.apply(joystick, button);
+            }
             wasButtonPressed = true;
         }
         if (wasButtonPressed && !joystick.getRawButton(button))
         {
+            if(offToggle != null) {
+                this.offToggle.apply(joystick, button);
+            }
             wasButtonPressed = false;
 
         }

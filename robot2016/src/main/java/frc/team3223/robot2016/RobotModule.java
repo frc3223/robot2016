@@ -23,8 +23,6 @@ public class RobotModule extends IterativeModule implements ITableListener {
     public static Logger logger;
 
     NetworkTable networkTable;
-    Joystick leftJoystick;
-    Joystick rightJoystick;
     DriveMode driveMode = DriveMode.SimpleTank;
     DriveMode lastDriveMode = DriveMode.SimpleTank;
     SimpleDrive simpleDrive;
@@ -62,11 +60,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
         driveModes = new HashMap<>();
         autonomousModes = new HashMap<>();
         currentAutonomousMode = AutonomousMode.DriveToHighGoal;
-
         conf = new RobotConfiguration(networkTable);
-
-
-
 
         initSensors();
         initShooter();
@@ -93,9 +87,9 @@ public class RobotModule extends IterativeModule implements ITableListener {
     }
 
     private void initSimpleDrive() {
-        simpleDrive = new SimpleDrive(leftJoystick,rightJoystick, this.conf, networkTable );
-        toggleButtons.add(new ToggleButton(leftJoystick, 8)
-                .onToggleOn(x -> {
+        simpleDrive = new SimpleDrive(this.conf, networkTable );
+        toggleButtons.add(new ToggleButton(conf.getLeftJoystick(), 8)
+                .onToggleOn((j, b) -> {
                     simpleDrive.toggleNormalJoystickOrientation();
                 }));
         driveModes.put(DriveMode.SimpleTank, simpleDrive);
@@ -104,11 +98,11 @@ public class RobotModule extends IterativeModule implements ITableListener {
     private void initRotateToAngle() {
         rotateToAngle = new RotateToAngle(navX, simpleDrive);
         networkTable.addTableListener(rotateToAngle);
-        toggleButtons.add(new ToggleButton(leftJoystick, 9)
-                .onToggleOn(x -> {
+        toggleButtons.add(new ToggleButton(conf.getLeftJoystick(), 9)
+                .onToggleOn((j, b) -> {
                     pushDriveMode(DriveMode.RotateToAngle);
                 })
-                .onToggleOff(x -> {
+                .onToggleOff((j, b) -> {
                     revertDriveMode();
                 }));
         driveModes.put(DriveMode.RotateToAngle, rotateToAngle);
@@ -116,9 +110,9 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     private void initPolarDrive() {
         ptDrive = new PolarTankDrive(navX, this.conf, this.networkTable);
-        ptDrive.setDirectionJoystick(leftJoystick);
-        toggleButtons.add(new ToggleButton(leftJoystick, 5)
-                .onToggleOn(x -> {
+        ptDrive.setDirectionJoystick(conf.getLeftJoystick());
+        toggleButtons.add(new ToggleButton(conf.getLeftJoystick(), 5)
+                .onToggleOn((j, b) -> {
                     if(driveMode == DriveMode.PolarFCTank) {
                         revertDriveMode();
                     }else{
@@ -165,6 +159,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     @Override
     public void autonomousPeriodic() {
 
+        conf.toggleButtonsPeriodic();
         if (currentAutonomousMode == AutonomousMode.DriveToHighGoal) {
             this.driveToHighGoal.autonomousPeriodic();
         }
@@ -177,7 +172,8 @@ public class RobotModule extends IterativeModule implements ITableListener {
     @Override
     public void teleopPeriodic() {
         pushNavx();
-        toggleButtons.forEach(tb -> tb.teleopPeriodic());
+        conf.toggleButtonsPeriodic();
+        toggleButtons.forEach(tb -> tb.periodic());
 
         shooter.teleopPeriodic();
 
@@ -189,10 +185,19 @@ public class RobotModule extends IterativeModule implements ITableListener {
                 rotateToAngle.rotate();
                 break;
             case PolarFCTank:
-                ptDrive.driveSingle();
+                ptDrive.driveSingleFieldCentric();
                 break;
         }
+    }
 
+    @Override
+    public void testPeriodic() {
+        conf.toggleButtonsPeriodic();
+    }
+
+    @Override
+    public void disabledPeriodic() {
+        conf.toggleButtonsPeriodic();
     }
 
 

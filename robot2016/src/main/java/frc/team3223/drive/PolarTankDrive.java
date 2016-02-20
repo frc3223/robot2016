@@ -85,11 +85,35 @@ public class PolarTankDrive implements IDrive, MotorSafety {
         if(Math.abs(directionX) < 0.15 && Math.abs(directionY) < 0.15) {
             drive(0, 0);
         }else {
-            System.out.printf("theta=%f, power=%f\n", direction, power);
             this.networkTable.putNumber("theta", direction);
             this.networkTable.putNumber("power", power);
             drive(power, direction);
         }
+    }
+
+    public void driveSingleFieldCentric() {
+        driveSingleFieldCentric(this.getDirectionJoystick());
+    }
+
+    public void driveSingleFieldCentric(Joystick joystick) {
+        final double directionX = joystick.getX();
+        final double directionY = joystick.getY();
+        final double desiredAbsHeading = Math.toDegrees(Math.atan2(directionX, directionY));
+        final double powerRaw = Math.hypot(directionX, directionY);
+        final double power = Math.min(powerRaw, 1.0);
+
+        if(Math.abs(directionX) < 0.15 && Math.abs(directionY) < 0.15) {
+            drive(0, 0);
+        }else {
+            double desiredRelativeHeading = normalizeDegrees(desiredAbsHeading - gyro.getAngle());
+            if(Math.abs(desiredRelativeHeading) > 10) {
+                desiredRelativeHeading = Math.copySign(90, desiredRelativeHeading);
+            }
+            this.networkTable.putNumber("theta", desiredRelativeHeading);
+            this.networkTable.putNumber("power", power);
+            drive(power, desiredRelativeHeading);
+        }
+
     }
 
     /**

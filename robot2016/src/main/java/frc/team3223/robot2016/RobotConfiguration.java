@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Talon;
 //import edu.wpi.first.wpilibj.
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import frc.team3223.drive.ISpeedControllerProvider;
+import frc.team3223.util.ToggleButton;
 import jaci.openrio.toast.lib.registry.Registrar;
 
 import java.util.ArrayList;
@@ -14,9 +15,10 @@ import java.util.Iterator;
 public class RobotConfiguration implements ISpeedControllerProvider {
 
     ArrayList<Talon> talons;
+    ArrayList<ToggleButton> buttonPublishers;
     NetworkTable networkTable;
-    Joystick leftJoystick;
-    Joystick rightJoystick;
+    private Joystick leftJoystick;
+    private Joystick rightJoystick;
 
     private int shootButton = 3;
     private int slurpButton = 3;
@@ -33,6 +35,35 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         initTalons();
         initJoysticks();
         initShooter();
+        initButtonPublishers();
+    }
+
+    private void initButtonPublishers() {
+        buttonPublishers = new ArrayList<>();
+        for(int i = 1; i <= 11; i++) {
+            ToggleButton leftToggle = new ToggleButton(leftJoystick, i);
+            leftToggle.onToggleOn((j, b) -> {
+                networkTable.putBoolean("left_" + b + "_pressed", true);
+            });
+            leftToggle.onToggleOff((j, b) -> {
+                networkTable.putBoolean("left_" + b + "_pressed", false);
+            });
+            buttonPublishers.add(leftToggle);
+            ToggleButton rightToggle = new ToggleButton(rightJoystick, i);
+            rightToggle.onToggleOn((j, b) -> {
+                networkTable.putBoolean("right_" + b + "_pressed", true);
+            });
+            rightToggle.onToggleOff((j, b) -> {
+                networkTable.putBoolean("right_" + b + "_pressed", false);
+            });
+            buttonPublishers.add(rightToggle);
+        }
+    }
+
+    public void toggleButtonsPeriodic() {
+        buttonPublishers.forEach(toggleButton -> {
+            toggleButton.periodic();
+        });
     }
 
     public void publishJoystickConfiguration(){
@@ -146,4 +177,13 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     public Talon getRightWindowMotorTalon() {
         return rightWindowMotorTalon;
     }
+
+    public Joystick getLeftJoystick() {
+        return leftJoystick;
+    }
+
+    public Joystick getRightJoystick() {
+        return rightJoystick;
+    }
+
 }

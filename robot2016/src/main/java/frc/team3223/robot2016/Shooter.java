@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
 
 public class Shooter implements ITableListener {
-
     public double slurpSpeed = .78;
     public double slurpDirection = 1;
     public double shootSpeed = 1;
