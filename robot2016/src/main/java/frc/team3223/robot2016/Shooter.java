@@ -8,13 +8,7 @@ import jaci.openrio.toast.lib.registry.Registrar;
 
 public class Shooter implements ITableListener {
 
-    private Joystick shootJoystick;
-    private int shootButton;
-    private Joystick slurpJoystick;
-    private int slurpButton;
-    private final Joystick shooterControlStick;
-    private final int shooterUpButton;
-    private final int shooterDownButton;
+
     private Talon leftShooterTalon;
     private Talon rightShooterTalon;
     private Talon rollerTalon;
@@ -35,13 +29,12 @@ public class Shooter implements ITableListener {
     double arm_roller_out_dir = -1;
     double arm_roller_in_speed = 1;
     double arm_roller_in_dir = 1;
+    private RobotConfiguration configuration;
 
 
-    public Shooter(Joystick shootJoystick, int shootButton,
-                   Joystick slurpJoystick, int slurpButton,
-		   			Joystick shooterControlStick, int shooterUpButton, int shooterDownButton) {
+    public Shooter(RobotConfiguration configuration) {
 
-        this.shootJoystick = shootJoystick;
+       /*this.shootJoystick = shootJoystick;
         this.shootButton = shootButton;
         this.slurpJoystick = slurpJoystick;
         this.slurpButton = slurpButton;
@@ -53,28 +46,22 @@ public class Shooter implements ITableListener {
         this.rollerTalon = Registrar.talon(6);
         this.leftWindowMotorTalon = Registrar.talon(7);
         this.rightWindowMotorTalon = Registrar.talon(8);
+        */
+        this.configuration = configuration;
     }
 
     public void teleopPeriodic() {
-        if (shouldShoot()) {
+        if (configuration.shouldShoot()) {
             shoot();
-        } else if (shouldSlurp()) {
+        } else if (configuration.shouldSlurp()) {
             slurp();
-		} else if (shooterControlStick.getRawButton(shooterUpButton)){
+		} else if (configuration.shouldAimUp()){
 			raiseShooter();
-		} else if (shooterControlStick.getRawButton(shooterDownButton)){
+		} else if (configuration.shouldAimDown()){
 			lowerShooter();
 		} else {
             stop();
         }
-    }
-
-    public boolean shouldShoot() {
-        return shootJoystick.getRawButton(shootButton);
-    }
-
-    public boolean shouldSlurp() {
-        return slurpJoystick.getRawButton(slurpButton);
     }
 
 	public boolean shouldMoveShooter(){

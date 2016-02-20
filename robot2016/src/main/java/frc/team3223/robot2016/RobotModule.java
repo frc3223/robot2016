@@ -13,11 +13,9 @@ import jaci.openrio.toast.core.ToastBootstrap;
 import jaci.openrio.toast.lib.log.Logger;
 import jaci.openrio.toast.lib.module.IterativeModule;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import jaci.openrio.toast.lib.registry.Registrar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class RobotModule extends IterativeModule implements ITableListener {
@@ -37,7 +35,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     Map<AutonomousMode, IAutonomous> autonomousModes;
     DriveToHighGoal driveToHighGoal;
     AutonomousMode currentAutonomousMode;
-    RobotConfiguration configuration;
+    RobotConfiguration conf;
 
     Shooter shooter;
     ArrayList<ToggleButton> toggleButtons;
@@ -65,11 +63,11 @@ public class RobotModule extends IterativeModule implements ITableListener {
         autonomousModes = new HashMap<>();
         currentAutonomousMode = AutonomousMode.DriveToHighGoal;
 
-        configuration = new RobotConfiguration();
+        conf = new RobotConfiguration(networkTable);
 
 
 
-        initJoysticks();
+
         initSensors();
         initShooter();
         initSimpleDrive();
@@ -86,13 +84,8 @@ public class RobotModule extends IterativeModule implements ITableListener {
     }
 
     private void initShooter() {
-        shooter = new Shooter(leftJoystick, 3, rightJoystick, 3 ,rightJoystick, 4, 5);
+        shooter = new Shooter(conf);
         networkTable.addTableListener(shooter);
-    }
-
-    private void initJoysticks() {
-        leftJoystick = new Joystick(0);
-        rightJoystick = new Joystick(1);
     }
 
     private void initSensors() {
@@ -100,7 +93,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     }
 
     private void initSimpleDrive() {
-        simpleDrive = new SimpleDrive(leftJoystick,rightJoystick, this.configuration, networkTable );
+        simpleDrive = new SimpleDrive(leftJoystick,rightJoystick, this.conf, networkTable );
         toggleButtons.add(new ToggleButton(leftJoystick, 8)
                 .onToggleOn(x -> {
                     simpleDrive.toggleNormalJoystickOrientation();
@@ -122,7 +115,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     }
 
     private void initPolarDrive() {
-        ptDrive = new PolarTankDrive(navX, this.configuration, this.networkTable);
+        ptDrive = new PolarTankDrive(navX, this.conf, this.networkTable);
         ptDrive.setDirectionJoystick(leftJoystick);
         toggleButtons.add(new ToggleButton(leftJoystick, 5)
                 .onToggleOn(x -> {
@@ -166,6 +159,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     @Override
     public void autonomousInit() {
         shooter.publishValues();
+        conf.publishJoystickConfiguration();
     }
 
     @Override
