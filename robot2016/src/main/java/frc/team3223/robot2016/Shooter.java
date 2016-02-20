@@ -12,6 +12,9 @@ public class Shooter implements ITableListener {
     private int shootButton;
     private Joystick slurpJoystick;
     private int slurpButton;
+    private final Joystick shooterControlStick;
+    private final int shooterUpButton;
+    private final int shooterDownButton;
     private Talon leftShooterTalon;
     private Talon rightShooterTalon;
     private Talon rollerTalon;
@@ -42,6 +45,9 @@ public class Shooter implements ITableListener {
         this.shootButton = shootButton;
         this.slurpJoystick = slurpJoystick;
         this.slurpButton = slurpButton;
+        this.shooterControlStick = shooterControlStick;
+        this.shooterUpButton = shooterUpButton;
+        this.shooterDownButton = shooterDownButton;
         this.leftShooterTalon = Registrar.talon(4);
         this.rightShooterTalon = Registrar.talon(5);
         this.rollerTalon = Registrar.talon(6);
@@ -72,7 +78,7 @@ public class Shooter implements ITableListener {
     }
 
 	public boolean shouldMoveShooter(){
-		
+        return false;
 	}
 
     public void shoot() {

@@ -20,12 +20,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class RobotModule extends IterativeModule implements ITableListener, ISpeedControllerProvider {
+public class RobotModule extends IterativeModule implements ITableListener {
 
     public static Logger logger;
 
     NetworkTable networkTable;
-    ArrayList<Talon> talons;
     Joystick leftJoystick;
     Joystick rightJoystick;
     DriveMode driveMode = DriveMode.SimpleTank;
@@ -38,6 +37,7 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
     Map<AutonomousMode, IAutonomous> autonomousModes;
     DriveToHighGoal driveToHighGoal;
     AutonomousMode currentAutonomousMode;
+    RobotConfiguration configuration;
 
     Shooter shooter;
     ArrayList<ToggleButton> toggleButtons;
@@ -65,7 +65,10 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
         autonomousModes = new HashMap<>();
         currentAutonomousMode = AutonomousMode.DriveToHighGoal;
 
-        initTalons();
+        configuration = new RobotConfiguration();
+
+
+
         initJoysticks();
         initSensors();
         initShooter();
@@ -97,21 +100,12 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
     }
 
     private void initSimpleDrive() {
-        simpleDrive = new SimpleDrive(leftJoystick,rightJoystick, this, networkTable );
+        simpleDrive = new SimpleDrive(leftJoystick,rightJoystick, this.configuration, networkTable );
         toggleButtons.add(new ToggleButton(leftJoystick, 8)
                 .onToggleOn(x -> {
                     simpleDrive.toggleNormalJoystickOrientation();
                 }));
         driveModes.put(DriveMode.SimpleTank, simpleDrive);
-    }
-
-    private void initTalons() {
-        int n = 6;
-        talons = new ArrayList<Talon>(n);
-        for(int j = 0; j < n; j ++) {
-            Talon talon = Registrar.talon(j);
-            talons.add(talon);
-        }
     }
 
     private void initRotateToAngle() {
@@ -128,7 +122,7 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
     }
 
     private void initPolarDrive() {
-        ptDrive = new PolarTankDrive(navX, this);
+        ptDrive = new PolarTankDrive(navX, this.configuration, this.networkTable);
         ptDrive.setDirectionJoystick(leftJoystick);
         toggleButtons.add(new ToggleButton(leftJoystick, 5)
                 .onToggleOn(x -> {
@@ -165,27 +159,6 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
             au.disable();
         });
     }
-
-    @Override
-    public Talon getFrontLeftTalon() {
-        return talons.get(0);
-    }
-
-    @Override
-    public Talon getRearLeftTalon() {
-        return talons.get(1);
-    }
-
-    @Override
-    public Talon getFrontRightTalon() {
-        return talons.get(2);
-    }
-
-    @Override
-    public Talon getRearRightTalon() {
-        return talons.get(3);
-    }
-
     public static boolean isReal() {
         return !ToastBootstrap.isSimulation;
     }
@@ -197,9 +170,6 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
 
     @Override
     public void autonomousPeriodic() {
-        talons.forEach(talon -> {
-            talon.Feed();
-        });
 
         if (currentAutonomousMode == AutonomousMode.DriveToHighGoal) {
             this.driveToHighGoal.autonomousPeriodic();
@@ -207,7 +177,7 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
     }
 
     @Override public void teleopInit() {
-        pushDriveMode(DriveMode.SimpleTank);
+        pushDriveMode(DriveMode.PolarFCTank);
     }
 
     @Override
@@ -246,21 +216,5 @@ public class RobotModule extends IterativeModule implements ITableListener, ISpe
     public void valueChanged(ITable table,
             String name, Object value, boolean isNew) {
         System.out.println("received " + name + ": " + value);
-    }
-
-    @Override
-    public Iterator<SpeedController> getLeftMotors() {
-        ArrayList<SpeedController> grr = new ArrayList<>(2);
-        grr.add(getFrontLeftTalon());
-        grr.add(getRearLeftTalon());
-        return grr.iterator();
-    }
-
-    @Override
-    public Iterator<SpeedController> getRightMotors() {
-        ArrayList<SpeedController> grr = new ArrayList<>(2);
-        grr.add(getFrontRightTalon());
-        grr.add(getRearRightTalon());
-        return grr.iterator();
     }
 }

@@ -44,9 +44,10 @@ public class PolarTankDrive implements IDrive, MotorSafety {
     private double rotateThreshold;
     public final static double kDefaultExpirationTime = 0.1;
 
-    public PolarTankDrive(Gyro gyro, ISpeedControllerProvider driveProvider) {
+    public PolarTankDrive(Gyro gyro, ISpeedControllerProvider driveProvider, NetworkTable networkTable) {
         this.gyro = gyro;
         this.driveProvider = driveProvider;
+        this.networkTable = networkTable;
         this.rotateThreshold = 10;
         setupMotorSafety();
         disable();
@@ -81,7 +82,14 @@ public class PolarTankDrive implements IDrive, MotorSafety {
         final double powerRaw = Math.hypot(directionX, directionY);
         final double power = Math.min(powerRaw, 1.0);
 
-        drive(power, direction);
+        if(Math.abs(directionX) < 0.15 && Math.abs(directionY) < 0.15) {
+            drive(0, 0);
+        }else {
+            System.out.printf("theta=%f, power=%f\n", direction, power);
+            this.networkTable.putNumber("theta", direction);
+            this.networkTable.putNumber("power", power);
+            drive(power, direction);
+        }
     }
 
     /**
