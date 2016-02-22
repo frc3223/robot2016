@@ -1,6 +1,7 @@
 package frc.team3223.robot2016;
 
 import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
 
@@ -20,11 +21,13 @@ public class Shooter implements ITableListener {
     double arm_roller_in_speed = 1;
     double arm_roller_in_dir = 1;
     private RobotConfiguration conf;
+    private NetworkTable networkTable;
 
 
-    public Shooter(RobotConfiguration conf) {
+    public Shooter(RobotConfiguration conf, NetworkTable networkTable) {
 
         this.conf = conf;
+        this.networkTable = networkTable;
     }
 
     public void teleopPeriodic() {
@@ -130,23 +133,21 @@ public class Shooter implements ITableListener {
     }
 
     public void publishValues() {
-        System.out.println("yup publishing values");
-        /*
         networkTable.putNumber("arm_pitch_up_speed", getArmPitchUpSpeed());
         networkTable.putNumber("arm_pitch_down_speed", getArmPitchDownSpeed());
         networkTable.putNumber("arm_roller_out_speed", getArmRollerOutSpeed());
         networkTable.putNumber("arm_roller_in_speed", getArmRollerInSpeed());
-        */
-        System.out.println("yup didn't actually do that");
     }
 
     public void raiseShooter() {
-        conf.getLeftWindowMotorTalon().set(.25);
-        conf.getRightWindowMotorTalon().set(-.25);
+        System.out.println("raise shooter");
+        conf.getLeftWindowMotorTalon().set(getArmPitchUpSpeed());
+        conf.getRightWindowMotorTalon().set(-getArmPitchUpSpeed());
     }
 
     public void lowerShooter() {
-        conf.getLeftWindowMotorTalon().set(-.25);
-        conf.getRightWindowMotorTalon().set(.25);
+        System.out.println("lower shooter");
+        conf.getLeftWindowMotorTalon().set(getArmPitchDownSpeed());
+        conf.getRightWindowMotorTalon().set(-getArmPitchDownSpeed());
     }
 }

@@ -69,6 +69,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
         initPolarDrive();
         initDriveToHighGoal();
 
+        conf.publishJoystickConfiguration();
     }
 
     private void initDriveToHighGoal() {
@@ -78,7 +79,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     }
 
     private void initShooter() {
-        shooter = new Shooter(conf);
+        shooter = new Shooter(conf, networkTable);
         networkTable.addTableListener(shooter);
     }
 
@@ -158,6 +159,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     @Override
     public void autonomousPeriodic() {
+        pushNavx();
 
         conf.toggleButtonsPeriodic();
         if (currentAutonomousMode == AutonomousMode.DriveToHighGoal) {
@@ -166,6 +168,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     }
 
     @Override public void teleopInit() {
+        conf.publishJoystickConfiguration();
         pushDriveMode(DriveMode.PolarFCTank);
     }
 
@@ -193,11 +196,13 @@ public class RobotModule extends IterativeModule implements ITableListener {
     @Override
     public void testPeriodic() {
         conf.toggleButtonsPeriodic();
+        pushNavx();
     }
 
     @Override
     public void disabledPeriodic() {
         conf.toggleButtonsPeriodic();
+        pushNavx();
     }
 
 
