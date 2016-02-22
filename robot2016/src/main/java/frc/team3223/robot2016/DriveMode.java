@@ -4,5 +4,6 @@ public enum DriveMode {
     SimpleTank,
     PolarFCTank,
     PolarFCTankRev,
-    RotateToAngle;
+    RotateToAngle,
+    AimAssist;
 }

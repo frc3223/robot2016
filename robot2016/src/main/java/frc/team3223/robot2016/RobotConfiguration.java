@@ -24,6 +24,11 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private int slurpButton = 3;
     private int shooterUpButton = 4;
     private int shooterDownButton = 5;
+    private int simpleDriveButton = 8;
+    private int rotateToAngleButton = 9;
+    private int polarDriveButton = 10;
+    private int aimAssistButton = 11;
+
     private Talon leftShooterTalon;
     private Talon rightShooterTalon;
     private Talon rollerTalon;
@@ -67,13 +72,17 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     }
 
     public void publishJoystickConfiguration(){
-        /* assigning joystick buttons to names to be dispalyed in the dashboard
+        /* assigning joystick buttons to names to be displayed in the dashboard
          * left = leftJoystick : right = rightJoystick
          */
         networkTable.putString("left_" + shootButton, "fire");
         networkTable.putString("right_" + slurpButton, "get ball");
         networkTable.putString("left_" + shooterUpButton, "aim up");
         networkTable.putString("left_" + shooterDownButton, "aim down");
+        networkTable.putString("left_" + aimAssistButton, "aim assist drive mode (untested)");
+        networkTable.putString("left_" + rotateToAngleButton, "rotate to angle drive mode (untested)");
+        networkTable.putString("left_" + polarDriveButton, "polar fc tank drive mode (untested)");
+        networkTable.putString("left_" + simpleDriveButton, "reset to tank drive mode");
     }
 
 
@@ -91,6 +100,10 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
     public boolean shouldAimDown(){
         return leftJoystick.getRawButton(shooterDownButton);
+    }
+
+    public ToggleButton makeRotateToAngleToggle() {
+        return new ToggleButton(getLeftJoystick(), rotateToAngleButton);
     }
 
     private void initJoysticks() {
@@ -186,4 +199,19 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         return rightJoystick;
     }
 
+    public ToggleButton makeAimAssistToggle() {
+        return new ToggleButton(leftJoystick, aimAssistButton);
+    }
+
+    public boolean shouldAimAssist() {
+        return leftJoystick.getRawButton(aimAssistButton);
+    }
+
+    public ToggleButton makePolarDriveToggle() {
+        return new ToggleButton(getLeftJoystick(), polarDriveButton);
+    }
+
+    public ToggleButton makeSimpleDriveToggle() {
+        return new ToggleButton(getLeftJoystick(), simpleDriveButton);
+    }
 }
