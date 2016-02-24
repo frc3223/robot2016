@@ -88,10 +88,12 @@ public class Shooter implements ITableListener {
             stopRaiser();
         }
 
+        /*
         if(conf.getShooterDownLimitSwitch().get()) {
             conf.getShooterGyro().reset();
         }
         tailperiodic();
+        */
     }
 
 	public boolean shouldMoveShooter(){

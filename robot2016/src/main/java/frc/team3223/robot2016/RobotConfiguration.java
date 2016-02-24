@@ -52,14 +52,14 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     public RobotConfiguration(NetworkTable networkTable){
         this.networkTable = networkTable;
         navX = NavXRegistrar.navX();
-        shooterGyro = new AnalogGyro(0);
-        shooterDownLimitSwitch = Registrar.digitalInput(0);
+        //shooterGyro = new AnalogGyro(0);
+        //shooterDownLimitSwitch = Registrar.digitalInput(0);
         initTalons();
         initJoysticks();
         initShooter();
         initButtonPublishers();
-        TailLimitSwitch1=Registrar.digitalInput(1);
-        TailSpark=Registrar.spark(1);
+        //TailLimitSwitch1=Registrar.digitalInput(1);
+        //TailSpark=Registrar.spark(1);
     }
 
     private void initButtonPublishers() {
