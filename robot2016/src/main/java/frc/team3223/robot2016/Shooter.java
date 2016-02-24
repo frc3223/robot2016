@@ -1,5 +1,7 @@
 package frc.team3223.robot2016;
 
+import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.tables.ITable;
@@ -23,6 +25,7 @@ public class Shooter implements ITableListener {
     private RobotConfiguration conf;
     private NetworkTable networkTable;
 
+    int tailState=0;
 
     public Shooter(RobotConfiguration conf, NetworkTable networkTable) {
 
@@ -42,6 +45,7 @@ public class Shooter implements ITableListener {
 		} else {
             stop();
         }
+        tailperiodic();
     }
 
 	public boolean shouldMoveShooter(){
@@ -51,7 +55,24 @@ public class Shooter implements ITableListener {
     public void shoot() {
         conf.getLeftShooterTalon().set(getShootSpeed());
         conf.getRightShooterTalon().set(-getShootSpeed());
+    }
 
+    public void tailperiodic(){
+        if (tailState==0) {
+            conf.getTailSpark().set(-1);
+
+            if (conf.shouldShoot()){
+                tailState=1;
+
+            }
+
+        }
+        else if (tailState==1){
+            conf.getTailSpark().set(1);
+            if (conf.getTailLimitSwitch1().get()){
+                tailState=0;
+            }
+        }
     }
 
     public void slurp() {

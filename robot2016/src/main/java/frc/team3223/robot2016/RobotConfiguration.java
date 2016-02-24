@@ -1,8 +1,6 @@
 package frc.team3223.robot2016;
 
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.SpeedController;
-import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.*;
 //import edu.wpi.first.wpilibj.
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import frc.team3223.drive.ISpeedControllerProvider;
@@ -35,12 +33,19 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private Talon leftWindowMotorTalon;
     private Talon rightWindowMotorTalon;
 
+    private DigitalInput TailLimitSwitch1;
+    private Spark TailSpark;
+
+
+
     public RobotConfiguration(NetworkTable networkTable){
         this.networkTable = networkTable;
         initTalons();
         initJoysticks();
         initShooter();
         initButtonPublishers();
+        TailLimitSwitch1=Registrar.digitalInput(1);
+        TailSpark=Registrar.spark(1);
     }
 
     private void initButtonPublishers() {
@@ -214,4 +219,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     public ToggleButton makeSimpleDriveToggle() {
         return new ToggleButton(getLeftJoystick(), simpleDriveButton);
     }
+
+    public DigitalInput getTailLimitSwitch1() {return TailLimitSwitch1;}
+
+    public Spark getTailSpark() {return TailSpark;}
 }
