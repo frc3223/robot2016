@@ -44,6 +44,11 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private INavX navX;
     private DigitalInput shooterDownLimitSwitch;
 
+    private DigitalInput TailLimitSwitch1;
+    private Spark TailSpark;
+
+
+
     public RobotConfiguration(NetworkTable networkTable){
         this.networkTable = networkTable;
         navX = NavXRegistrar.navX();
@@ -53,6 +58,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         initJoysticks();
         initShooter();
         initButtonPublishers();
+        TailLimitSwitch1=Registrar.digitalInput(1);
+        TailSpark=Registrar.spark(1);
     }
 
     private void initButtonPublishers() {
@@ -242,4 +249,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     public DigitalInput getShooterDownLimitSwitch() {
         return shooterDownLimitSwitch;
     }
+    public DigitalInput getTailLimitSwitch1() {return TailLimitSwitch1;}
+
+    public Spark getTailSpark() {return TailSpark;}
 }
