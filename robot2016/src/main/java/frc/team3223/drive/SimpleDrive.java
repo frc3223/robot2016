@@ -63,12 +63,12 @@ public class SimpleDrive implements IDrive{
 
     @Override
     public void disable() {
-        drive.setSafetyEnabled(false);
+        //drive.setSafetyEnabled(false);
     }
 
     public void drive() {
         double leftValue = leftJoystick.getAxis(Joystick.AxisType.kY) * getMaxSpeedModifier();
-        double rightValue = rightJoystick.getAxis(Joystick.AxisType.kY) * getMaxSpeedModifier();
+        double rightValue = -rightJoystick.getAxis(Joystick.AxisType.kY) * getMaxSpeedModifier();
         if(Math.abs(leftValue) < getZeroThreshold()) {
             leftValue = 0;
         }

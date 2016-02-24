@@ -14,18 +14,68 @@ public class NavX implements INavX {
     }
 
     @Override
-    public double getYaw() {
+    public float getYaw() {
         return ahrs.getYaw();
     }
 
     @Override
-    public double getPitch() {
+    public float getPitch() {
         return ahrs.getPitch();
     }
 
     @Override
-    public double getRoll() {
+    public float getRoll() {
         return ahrs.getRoll();
+    }
+
+    @Override
+    public float getWorldLinearAccelX() {
+        return ahrs.getWorldLinearAccelX();
+    }
+
+    @Override
+    public float getWorldLinearAccelY() {
+        return ahrs.getWorldLinearAccelY();
+    }
+
+    @Override
+    public float getWorldLinearAccelZ() {
+       return ahrs.getWorldLinearAccelZ();
+    }
+
+    @Override
+    public float getVelocityX() {
+        return ahrs.getVelocityX();
+    }
+
+    @Override
+    public float getVelocityY() {
+        return ahrs.getVelocityY();
+    }
+
+    @Override
+    public float getVelocityZ() {
+        return ahrs.getVelocityZ();
+    }
+
+    @Override
+    public float getDisplacementX() {
+        return ahrs.getDisplacementX();
+    }
+
+    @Override
+    public float getDisplacementY() {
+        return ahrs.getDisplacementY();
+    }
+
+    @Override
+    public float getDisplacementZ() {
+        return ahrs.getDisplacementZ();
+    }
+
+    @Override
+    public float getFusedHeading() {
+        return ahrs.getFusedHeading();
     }
 
     @Override

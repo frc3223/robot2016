@@ -13,9 +13,9 @@ public class SillyAimAssist implements IDrive, ITableListener{
     private double theta = 0;
     private double k = 1 / 44.;
 
-    public SillyAimAssist(RobotConfiguration conf, Gyro gyro) {
+    public SillyAimAssist(RobotConfiguration conf) {
         this.conf = conf;
-        this.gyro = gyro;
+        this.gyro = conf.getNavX();
     }
 
     public void drive() {
@@ -41,7 +41,7 @@ public class SillyAimAssist implements IDrive, ITableListener{
 
     @Override
     public void valueChanged(ITable source, String key, Object value, boolean isNew) {
-        if(key.equals("theta")) {
+        if(key.equals("target_theta")) {
             double t = (double) value;
             // "no data" value is 1000
             if(Math.abs(t) <= 100) {
