@@ -24,7 +24,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private int slurpButton = 3;
     private int shooterUpButton = 4;
     private int shooterDownButton = 5;
-    private int simpleDriveButton = 8;
+    private int simpleDriveReverseButton = 5;
+    private int simpleDriveResetButton = 8;
     private int rotateToAngleButton = 9;
     private int polarDriveButton = 10;
     private int aimAssistButton = 11;
@@ -96,12 +97,13 @@ public class RobotConfiguration implements ISpeedControllerProvider {
          */
         networkTable.putString("left_" + shootButton, "fire");
         networkTable.putString("right_" + slurpButton, "get ball");
+        networkTable.putString("right_" + simpleDriveReverseButton, "reverse tank drive");
         networkTable.putString("left_" + shooterUpButton, "aim up");
         networkTable.putString("left_" + shooterDownButton, "aim down");
         networkTable.putString("left_" + aimAssistButton, "aim assist drive mode (untested)");
         networkTable.putString("left_" + rotateToAngleButton, "rotate to angle drive mode (untested)");
         networkTable.putString("left_" + polarDriveButton, "polar fc tank drive mode (untested)");
-        networkTable.putString("left_" + simpleDriveButton, "reset to tank drive mode");
+        networkTable.putString("left_" + simpleDriveResetButton, "reset to tank drive mode");
     }
 
 
@@ -230,8 +232,12 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         return new ToggleButton(getLeftJoystick(), polarDriveButton);
     }
 
-    public ToggleButton makeSimpleDriveToggle() {
-        return new ToggleButton(getLeftJoystick(), simpleDriveButton);
+    public ToggleButton makeSimpleDriveResetToggle() {
+        return new ToggleButton(getLeftJoystick(), simpleDriveResetButton);
+    }
+
+    public ToggleButton makeSimpleDriveReverseToggle() {
+        return new ToggleButton(getRightJoystick(), simpleDriveReverseButton);
     }
 
     public double getShooterPitch() {

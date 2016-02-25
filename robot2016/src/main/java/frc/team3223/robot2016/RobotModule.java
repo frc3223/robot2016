@@ -100,9 +100,15 @@ public class RobotModule extends IterativeModule implements ITableListener {
     private void initSimpleDrive() {
         simpleDrive = new SimpleDrive(this.conf, networkTable);
         driveModes.put(DriveMode.SimpleTank, simpleDrive);
-        ToggleButton toggle = conf.makeSimpleDriveToggle();
+        ToggleButton toggle = conf.makeSimpleDriveResetToggle();
         toggle.onToggleOn((j, b) -> {
             lastDriveMode = driveMode = DriveMode.SimpleTank;
+        });
+        toggleButtons.add(toggle);
+
+        toggle = conf.makeSimpleDriveReverseToggle();
+        toggle.onToggleOn((j, b) -> {
+            simpleDrive.toggleNormalJoystickOrientation();
         });
         toggleButtons.add(toggle);
     }

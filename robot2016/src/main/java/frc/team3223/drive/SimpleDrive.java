@@ -68,7 +68,7 @@ public class SimpleDrive implements IDrive{
 
     public void drive() {
         double leftValue = leftJoystick.getAxis(Joystick.AxisType.kY) * getMaxSpeedModifier();
-        double rightValue = -rightJoystick.getAxis(Joystick.AxisType.kY) * getMaxSpeedModifier();
+        double rightValue = rightJoystick.getAxis(Joystick.AxisType.kY) * getMaxSpeedModifier();
         if(Math.abs(leftValue) < getZeroThreshold()) {
             leftValue = 0;
         }
@@ -84,7 +84,7 @@ public class SimpleDrive implements IDrive{
             rightValue=-rightValue;
         }
 
-        drive(leftValue, rightValue);
+        drive(leftValue, -rightValue);
     }
 
     public void drive(double leftValue, double rightValue) {
