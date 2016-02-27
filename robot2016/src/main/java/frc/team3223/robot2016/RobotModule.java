@@ -1,5 +1,6 @@
 package frc.team3223.robot2016;
 
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
 import frc.team3223.autonomous.DriveToHighGoal;
@@ -28,7 +29,6 @@ public class RobotModule extends IterativeModule implements ITableListener {
     PolarTankDrive ptDrive;
     RotateToAngle rotateToAngle;
     Map<DriveMode, IDrive> driveModes;
-    INavX navX;
     Map<AutonomousMode, IAutonomous> autonomousModes;
     DriveToHighGoal driveToHighGoal;
     AutonomousMode currentAutonomousMode;
@@ -40,6 +40,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     boolean shouldRotate = false;
 
     double desiredHeading = 0.00;
+    private int autoBegin = 0;
 
     @Override
     public String getModuleName() {
@@ -62,7 +63,6 @@ public class RobotModule extends IterativeModule implements ITableListener {
         currentAutonomousMode = AutonomousMode.DriveToHighGoal;
         conf = new RobotConfiguration(networkTable);
 
-        initSensors();
         initShooter();
         initSimpleDrive();
         initRotateToAngle();
@@ -74,7 +74,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     }
 
     private void initAimAssist() {
-        aimAssist = new SillyAimAssist(conf, navX);
+        aimAssist = new SillyAimAssist(conf);
         driveModes.put(DriveMode.AimAssist, aimAssist);
         ToggleButton toggle = conf.makeAimAssistToggle();
         toggle.onToggleOn((j, b) -> {
@@ -97,22 +97,24 @@ public class RobotModule extends IterativeModule implements ITableListener {
         networkTable.addTableListener(shooter);
     }
 
-    private void initSensors() {
-        navX = NavXRegistrar.navX();
-    }
-
     private void initSimpleDrive() {
         simpleDrive = new SimpleDrive(this.conf, networkTable);
         driveModes.put(DriveMode.SimpleTank, simpleDrive);
-        ToggleButton toggle = conf.makeSimpleDriveToggle();
+        ToggleButton toggle = conf.makeSimpleDriveResetToggle();
         toggle.onToggleOn((j, b) -> {
             lastDriveMode = driveMode = DriveMode.SimpleTank;
+        });
+        toggleButtons.add(toggle);
+
+        toggle = conf.makeSimpleDriveReverseToggle();
+        toggle.onToggleOn((j, b) -> {
+            simpleDrive.toggleNormalJoystickOrientation();
         });
         toggleButtons.add(toggle);
     }
 
     private void initRotateToAngle() {
-        rotateToAngle = new RotateToAngle(navX, simpleDrive);
+        rotateToAngle = new RotateToAngle(conf.getNavX(), simpleDrive);
         networkTable.addTableListener(rotateToAngle);
         toggleButtons.add(conf.makeRotateToAngleToggle()
                 .onToggleOn((j, b) -> {
@@ -125,7 +127,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     }
 
     private void initPolarDrive() {
-        ptDrive = new PolarTankDrive(navX, this.conf, this.networkTable);
+        ptDrive = new PolarTankDrive(conf.getNavX(), this.conf, this.networkTable);
         ptDrive.setDirectionJoystick(conf.getLeftJoystick());
         toggleButtons.add(conf.makePolarDriveToggle()
                 .onToggleOn((j, b) -> {
@@ -170,6 +172,9 @@ public class RobotModule extends IterativeModule implements ITableListener {
     public void autonomousInit() {
         shooter.publishValues();
         conf.publishJoystickConfiguration();
+
+        // tell raspi to begin logging sensor data
+        networkTable.putNumber("autonomousBegin", autoBegin++);
     }
 
     @Override
@@ -184,7 +189,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     @Override public void teleopInit() {
         conf.publishJoystickConfiguration();
-        pushDriveMode(DriveMode.PolarFCTank);
+        pushDriveMode(DriveMode.SimpleTank);
     }
 
     @Override
@@ -200,13 +205,13 @@ public class RobotModule extends IterativeModule implements ITableListener {
                 simpleDrive.drive();
                 break;
             case RotateToAngle:
-                rotateToAngle.rotate();
+                //rotateToAngle.rotate();
                 break;
             case PolarFCTank:
-                ptDrive.driveSingleFieldCentric();
+                //ptDrive.driveSingleFieldCentric();
                 break;
             case AimAssist:
-                aimAssist.drive();
+                //aimAssist.drive();
                 break;
         }
     }
@@ -226,13 +231,25 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     public void publishState() {
         if(isReal()) {
-            networkTable.putNumber("angle", navX.getAngle());
-            networkTable.putNumber("dangle", navX.getRate());
-            networkTable.putNumber("yaw", navX.getYaw());
-            networkTable.putNumber("pitch", navX.getPitch());
-            networkTable.putNumber("roll", navX.getRoll());
+            networkTable.putNumber("angle", conf.getNavX().getAngle());
+            networkTable.putNumber("dangle", conf.getNavX().getRate());
+            networkTable.putNumber("yaw", conf.getNavX().getYaw());
+            networkTable.putNumber("pitch", conf.getNavX().getPitch());
+            networkTable.putNumber("roll", conf.getNavX().getRoll());
+            networkTable.putNumber("accel_x", conf.getNavX().getWorldLinearAccelX());
+            networkTable.putNumber("accel_y", conf.getNavX().getWorldLinearAccelY());
+            networkTable.putNumber("accel_z", conf.getNavX().getWorldLinearAccelZ());
+            networkTable.putNumber("velocity_x", conf.getNavX().getVelocityX());
+            networkTable.putNumber("velocity_y", conf.getNavX().getVelocityY());
+            networkTable.putNumber("velocity_z", conf.getNavX().getVelocityZ());
+            networkTable.putNumber("pos_x", conf.getNavX().getDisplacementX());
+            networkTable.putNumber("pos_y", conf.getNavX().getDisplacementY());
+            networkTable.putNumber("pos_z", conf.getNavX().getDisplacementZ());
+            networkTable.putNumber("fused_heading", conf.getNavX().getFusedHeading());
+            networkTable.putNumber("shooter_pitch", conf.getShooterPitch());
         }
         networkTable.putString("driveMode", driveMode.toString());
+        networkTable.putNumber("raw_shooter_angle", conf.getShooterGyro().getAngle());
     }
 
     @Override

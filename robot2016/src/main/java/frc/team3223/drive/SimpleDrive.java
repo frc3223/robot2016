@@ -63,7 +63,7 @@ public class SimpleDrive implements IDrive{
 
     @Override
     public void disable() {
-        drive.setSafetyEnabled(false);
+        //drive.setSafetyEnabled(false);
     }
 
     public void drive() {
@@ -84,7 +84,7 @@ public class SimpleDrive implements IDrive{
             rightValue=-rightValue;
         }
 
-        drive(leftValue, rightValue);
+        drive(leftValue, -rightValue);
     }
 
     public void drive(double leftValue, double rightValue) {

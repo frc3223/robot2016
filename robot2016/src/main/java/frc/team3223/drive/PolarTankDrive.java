@@ -222,7 +222,7 @@ public class PolarTankDrive implements IDrive, MotorSafety {
 
     @Override
     public void disable() {
-        m_safetyHelper.setSafetyEnabled(false);
+        //m_safetyHelper.setSafetyEnabled(false);
 
     }
 

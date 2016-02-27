@@ -1,9 +1,11 @@
 package frc.team3223.robot2016;
 
 import edu.wpi.first.wpilibj.*;
-//import edu.wpi.first.wpilibj.
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import frc.team3223.drive.ISpeedControllerProvider;
+import frc.team3223.navx.INavX;
+import frc.team3223.navx.NavXRegistrar;
 import frc.team3223.util.ToggleButton;
 import jaci.openrio.toast.lib.registry.Registrar;
 
@@ -22,16 +24,26 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private int slurpButton = 3;
     private int shooterUpButton = 4;
     private int shooterDownButton = 5;
-    private int simpleDriveButton = 8;
+    private int simpleDriveReverseButton = 5;
+    private int simpleDriveResetButton = 8;
     private int rotateToAngleButton = 9;
     private int polarDriveButton = 10;
     private int aimAssistButton = 11;
+
+    private int leftShooterChannel = 4;
+    private int rightShooterChannel = 5;
+    private int rollerChannel = 6;
+    private int leftWindowMotorChannel = 7;
+    private int rightWindowMotorChannel = 8;
 
     private Talon leftShooterTalon;
     private Talon rightShooterTalon;
     private Talon rollerTalon;
     private Talon leftWindowMotorTalon;
     private Talon rightWindowMotorTalon;
+    private Gyro shooterGyro;
+    private INavX navX;
+    private DigitalInput shooterDownLimitSwitch;
 
     private DigitalInput TailLimitSwitch1;
     private Spark TailSpark;
@@ -40,12 +52,15 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
     public RobotConfiguration(NetworkTable networkTable){
         this.networkTable = networkTable;
+        navX = NavXRegistrar.navX();
+        //shooterGyro = new AnalogGyro(0);
+        //shooterDownLimitSwitch = Registrar.digitalInput(0);
         initTalons();
         initJoysticks();
         initShooter();
         initButtonPublishers();
-        TailLimitSwitch1=Registrar.digitalInput(1);
-        TailSpark=Registrar.spark(1);
+        //TailLimitSwitch1=Registrar.digitalInput(1);
+        //TailSpark=Registrar.spark(1);
     }
 
     private void initButtonPublishers() {
@@ -82,12 +97,13 @@ public class RobotConfiguration implements ISpeedControllerProvider {
          */
         networkTable.putString("left_" + shootButton, "fire");
         networkTable.putString("right_" + slurpButton, "get ball");
+        networkTable.putString("right_" + simpleDriveReverseButton, "reverse tank drive");
         networkTable.putString("left_" + shooterUpButton, "aim up");
         networkTable.putString("left_" + shooterDownButton, "aim down");
         networkTable.putString("left_" + aimAssistButton, "aim assist drive mode (untested)");
         networkTable.putString("left_" + rotateToAngleButton, "rotate to angle drive mode (untested)");
         networkTable.putString("left_" + polarDriveButton, "polar fc tank drive mode (untested)");
-        networkTable.putString("left_" + simpleDriveButton, "reset to tank drive mode");
+        networkTable.putString("left_" + simpleDriveResetButton, "reset to tank drive mode");
     }
 
 
@@ -133,11 +149,11 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     }
 
     public void initShooter(){
-        this.leftShooterTalon = Registrar.talon(4);
-        this.rightShooterTalon = Registrar.talon(5);
-        this.rollerTalon = Registrar.talon(6);
-        this.leftWindowMotorTalon = Registrar.talon(7);
-        this.rightWindowMotorTalon = Registrar.talon(8);
+        this.leftShooterTalon = Registrar.talon(leftShooterChannel);
+        this.rightShooterTalon = Registrar.talon(rightShooterChannel);
+        this.rollerTalon = Registrar.talon(rollerChannel);
+        this.leftWindowMotorTalon = Registrar.talon(leftWindowMotorChannel);
+        this.rightWindowMotorTalon = Registrar.talon(rightWindowMotorChannel);
     }
 
     @Override
@@ -216,10 +232,29 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         return new ToggleButton(getLeftJoystick(), polarDriveButton);
     }
 
-    public ToggleButton makeSimpleDriveToggle() {
-        return new ToggleButton(getLeftJoystick(), simpleDriveButton);
+    public ToggleButton makeSimpleDriveResetToggle() {
+        return new ToggleButton(getLeftJoystick(), simpleDriveResetButton);
     }
 
+    public ToggleButton makeSimpleDriveReverseToggle() {
+        return new ToggleButton(getRightJoystick(), simpleDriveReverseButton);
+    }
+
+    public double getShooterPitch() {
+        return shooterGyro.getAngle()-navX.getRoll();
+    }
+
+    public Gyro getShooterGyro() {
+        return shooterGyro;
+    }
+
+    public INavX getNavX() {
+        return navX;
+    }
+
+    public DigitalInput getShooterDownLimitSwitch() {
+        return shooterDownLimitSwitch;
+    }
     public DigitalInput getTailLimitSwitch1() {return TailLimitSwitch1;}
 
     public Spark getTailSpark() {return TailSpark;}

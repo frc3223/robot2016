@@ -14,9 +14,9 @@ public class Shooter implements ITableListener {
     public double shootDirection = -1;
 
     double arm_pitch_up_speed = 1.00;
-    double arm_pitch_up_dir = -1;
+    double arm_pitch_up_dir = 1;
     double arm_pitch_down_speed = 0.25;
-    double arm_pitch_down_dir = 1;
+    double arm_pitch_down_dir = -1;
 
     double arm_roller_out_speed = 1;
     double arm_roller_out_dir = -1;
@@ -24,6 +24,10 @@ public class Shooter implements ITableListener {
     double arm_roller_in_dir = 1;
     private RobotConfiguration conf;
     private NetworkTable networkTable;
+
+    boolean hasDesiredPitch = false;
+    int pitchState = 0;
+    double desiredPitch = 0;
 
     int tailState=0;
 
@@ -38,14 +42,58 @@ public class Shooter implements ITableListener {
             shoot();
         } else if (conf.shouldSlurp()) {
             slurp();
-		} else if (conf.shouldAimUp()){
+        } else {
+            stopShooter();
+        }
+
+        double angleThreshold = 3.0;
+        // convention: getShooterPitch returns zero when arm is level, positive value
+        // as arm goes up.
+
+        if (conf.shouldAimUp()){
 			raiseShooter();
 		} else if (conf.shouldAimDown()){
 			lowerShooter();
-		} else {
-            stop();
+        } else if(hasDesiredPitch) {
+            if(pitchState == 0) {
+                // 0: init - arm needs to go down to zero out shooter gyro
+                lowerShooter();
+
+                if (conf.getShooterDownLimitSwitch().get()) {
+                    pitchState = 1;
+                }
+            }else if(pitchState == 1) {
+                // 1: at bottom - reset shooter gyro and turn off window motors
+                conf.getShooterGyro().reset();
+                stopRaiser();
+
+                if (desiredPitch > conf.getShooterPitch()) {
+                    pitchState = 2;
+                }
+            }else if(pitchState == 2) {
+                // 2: going up! hope desired pitch isn't past
+                raiseShooter();
+
+                if(desiredPitch - conf.getShooterPitch() < angleThreshold ) {
+                    pitchState = 3;
+                }
+            }else if(conf.getShooterPitch() - desiredPitch > 3){
+                lowerShooter();
+            }else if(desiredPitch - conf.getShooterPitch() > 3) {
+                raiseShooter();
+            }else {
+                stopRaiser();
+            }
+        }else{
+            stopRaiser();
+        }
+
+        /*
+        if(conf.getShooterDownLimitSwitch().get()) {
+            conf.getShooterGyro().reset();
         }
         tailperiodic();
+        */
     }
 
 	public boolean shouldMoveShooter(){
@@ -81,7 +129,7 @@ public class Shooter implements ITableListener {
         conf.getRollerTalon().set(getRollerSlurpSpeed());
     }
 
-    public void stop() {
+    public void stopShooter() {
         conf.getRightShooterTalon().set(0.);
         conf.getLeftShooterTalon().set(0.);
         conf.getRollerTalon().set(0.);
@@ -163,12 +211,18 @@ public class Shooter implements ITableListener {
     public void raiseShooter() {
         System.out.println("raise shooter");
         conf.getLeftWindowMotorTalon().set(getArmPitchUpSpeed());
-        conf.getRightWindowMotorTalon().set(-getArmPitchUpSpeed());
+        conf.getRightWindowMotorTalon().set(getArmPitchUpSpeed());
     }
 
     public void lowerShooter() {
         System.out.println("lower shooter");
         conf.getLeftWindowMotorTalon().set(getArmPitchDownSpeed());
-        conf.getRightWindowMotorTalon().set(-getArmPitchDownSpeed());
+        conf.getRightWindowMotorTalon().set(getArmPitchDownSpeed());
+    }
+
+    public void stopRaiser() {
+        System.out.println("Stopping raise");
+        conf.getRightWindowMotorTalon().set(0.);
+        conf.getLeftWindowMotorTalon().set(0.);
     }
 }

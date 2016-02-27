@@ -33,17 +33,67 @@ public class NavXRegistrar {
             supplier = () -> {
                 return new INavX() {
                     @Override
-                    public double getYaw() {
+                    public float getYaw() {
                         return 0;
                     }
 
                     @Override
-                    public double getPitch() {
+                    public float getPitch() {
                         return 0;
                     }
 
                     @Override
-                    public double getRoll() {
+                    public float getRoll() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getWorldLinearAccelX() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getWorldLinearAccelY() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getWorldLinearAccelZ() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getVelocityX() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getVelocityY() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getVelocityZ() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getDisplacementX() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getDisplacementY() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getDisplacementZ() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getFusedHeading() {
                         return 0;
                     }
 
