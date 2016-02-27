@@ -9,58 +9,47 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Replayer {
-    public ArrayList<DriveMotorPowers> powers;
+    public HashMap<Long,DriveMotorRecording> recordings;
     private RobotConfiguration conf;
     private boolean replaying = false;
     private long startTime;
+    private long recordedEndTime;
     private int currentIndex;
 
     public Replayer(RobotConfiguration conf) {
         this.conf = conf;
-        this.powers = new ArrayList<>();
-    }
-
-    public int indexOfNextBelow(long now, int index) {
-        do{
-            if(index >= powers.size()) return -1;
-            DriveMotorPowers p = powers.get(index);
-            if(index+1 >= powers.size() && p.tick > now) return -1;
-            DriveMotorPowers p2 = powers.get(index+1);
-            if(p.tick <= now && p2.tick > now) {
-                return index;
-            }
-            index++;
-        }while(true);
-    }
-
-    public int indexOfNextAbove(long now, int index) {
-        return 1;
-
+        this.recordings = new HashMap<>();
     }
 
     public void replayPeriodic() {
         long now = System.currentTimeMillis() - startTime;
-        DriveMotorPowers p1, p2;
+        DriveMotorRecording r1, r2;
 
-        int index1 = indexOfNextBelow(now, currentIndex);
-        int index2 = indexOfNextAbove(now, currentIndex);
-        if(index2 == -1) {
-            index2 = index1;
+        long startTime = now;
+        long nextTime = now;
+
+        while(!this.recordings.containsKey(startTime)){
+            startTime--;
         }
-        if(index1 == -1) {
+        r1 = this.recordings.get(startTime);
+
+        while(!this.recordings.containsKey(nextTime)){
+            nextTime++;
+        }
+        r2 = this.recordings.get(nextTime);
+
+        DriveMotorRecording r = r1.interpolate(now,r2);
+
+        System.out.printf("T=%s (vs %s), RF=%.2f, RR=%.2f, LF=%.2f, LR=%.2f\n", System.currentTimeMillis() - startTime, r.tick,
+                r.frontRight, r.backRight, r.frontLeft, r.backLeft);
+
+        if(now > this.recordedEndTime) {
             replaying = false;
             return;
         }
-
-        p1 = powers.get(index1);
-        p2 = powers.get(index2);
-
-        System.out.printf("T=%s (vs %s), RF=%.2f, RR=%.2f, LF=%.2f, LR=%.2f\n", now, p1.tick,
-                p1.frontRight, p1.backRight, p1.frontLeft, p1.backLeft);
-
-        currentIndex = index1;
     }
 
     public void setup(String name) {
@@ -74,6 +63,7 @@ public class Replayer {
             int rightRearIndex = 2;
             int leftFrontIndex = 3;
             int leftRearIndex = 4;
+            this.recordedEndTime = 0;
             while((line=reader.readLine()) != null) {
                 if(header) {
                     String[] columns = line.split(",");
@@ -94,20 +84,19 @@ public class Replayer {
                     }
 
                     header = false;
-                }else{
+                }else {
                     String[] columns = line.split(",");
                     long time = Long.parseLong(columns[timeIndex]);
                     double leftFront = Double.parseDouble(columns[leftFrontIndex]);
                     double rightFront = Double.parseDouble(columns[rightFrontIndex]);
                     double leftRear = Double.parseDouble(columns[leftRearIndex]);
                     double rightRear = Double.parseDouble(columns[rightRearIndex]);
-                    DriveMotorPowers p = new DriveMotorPowers(time,
-                            leftFront, rightFront,
-                            leftRear, rightRear);
-                    powers.add(p);
-
+                    DriveMotorRecording p = new DriveMotorRecording(time, leftFront, rightFront, leftRear, rightRear);
+                    this.recordings.put(time, p);
+                    if(time > this.recordedEndTime) this.recordedEndTime = time;
                 }
             }
+
             replaying = true;
             startTime = System.currentTimeMillis();
             currentIndex = 0;
