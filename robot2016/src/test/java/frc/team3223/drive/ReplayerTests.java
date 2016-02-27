@@ -15,7 +15,7 @@ public class ReplayerTests {
         replayer.recordings.put(Long.valueOf(13), new DriveMotorRecording(13, 4.4, -4.4, 4.4, -4.4));
         replayer.recordings.put(Long.valueOf(23), new DriveMotorRecording(23, 4.4, -4.4, 4.4, -4.4));
         replayer.recordings.put(Long.valueOf(33), new DriveMotorRecording(33, 4.4, -4.4, 4.4, -4.4));
-
+        replayer.setEndTime(33);
         replayer.setNow(1);
         replayer.replayPeriodic();
 

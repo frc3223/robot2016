@@ -16,7 +16,7 @@ public class Replayer {
     private RobotConfiguration conf;
     private boolean replaying = false;
     private long startTime;
-    private long recordedEndTime;
+    protected long recordedEndTime;
     private int currentIndex;
 
     public Replayer(RobotConfiguration conf) {
@@ -36,20 +36,25 @@ public class Replayer {
         long startTime = now;
         long nextTime = now;
 
-        while(!this.recordings.containsKey(startTime)){
+        while(!this.recordings.containsKey(startTime) && startTime >= 0){
             startTime--;
         }
-        r1 = this.recordings.get(startTime);
+        r1 = (startTime > 0) ?  this.recordings.get(startTime):new DriveMotorRecording(0,0,0,0,0);
 
-        while(!this.recordings.containsKey(nextTime)){
+        while(!this.recordings.containsKey(nextTime) && nextTime <= this.recordedEndTime){
             nextTime++;
         }
-        r2 = this.recordings.get(nextTime);
+        r2 = (nextTime <= this.recordedEndTime) ? this.recordings.get(nextTime) : new DriveMotorRecording(now,0,0,0,0);
 
         DriveMotorRecording r = r1.interpolate(now,r2);
 
-        System.out.printf("T=%s (vs %s), RF=%.2f, RR=%.2f, LF=%.2f, LR=%.2f\n", getNow(), r.tick,
-                r.frontRight, r.backRight, r.frontLeft, r.backLeft);
+        //System.out.printf("T=%s (vs %s), RF=%.2f, RR=%.2f, LF=%.2f, LR=%.2f\n", getNow(), r.tick,
+        //        r.frontRight, r.backRight, r.frontLeft, r.backLeft);
+
+        conf.getFrontLeftTalon().set(r.frontLeft);
+        conf.getFrontRightTalon().set(r.frontRight);
+        conf.getRearLeftTalon().set(r.backLeft);
+        conf.getRearRightTalon().set(r.backRight);
 
         if(now > this.recordedEndTime) {
             replaying = false;
