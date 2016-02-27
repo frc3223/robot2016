@@ -16,7 +16,7 @@ public class SensorManager {
     private ADXL362 accelerometer;
 
     public SensorManager(){
-        this.accelerometer = new ADXL362(SensorManager.ACCELEROMETER_PORT, Accelerometer.Range.k4G);
+        this.accelerometer = new ADXL362(SensorManager.ACCELEROMETER_PORT, Accelerometer.Range.k2G);
         NetworkTable table = NetworkTable.getTable("SmartDashboard");
         table.putNumberArray("Accelerometer[x,y,z]",this.getAccelerometerValues());
     }
@@ -25,5 +25,7 @@ public class SensorManager {
         return new double[]{this.accelerometer.getX(),this.accelerometer.getY(),this.accelerometer.getZ()};
     }
 
-
+    public double getAngle(){
+        this.
+    }
 }
