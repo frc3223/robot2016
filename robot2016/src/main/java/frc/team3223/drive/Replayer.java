@@ -24,8 +24,13 @@ public class Replayer {
         this.recordings = new HashMap<>();
     }
 
-    public void replayPeriodic() {
+    public long getNow() {
         long now = System.currentTimeMillis() - startTime;
+        return now;
+    }
+
+    public void replayPeriodic() {
+        long now = getNow();
         DriveMotorRecording r1, r2;
 
         long startTime = now;
@@ -43,7 +48,7 @@ public class Replayer {
 
         DriveMotorRecording r = r1.interpolate(now,r2);
 
-        System.out.printf("T=%s (vs %s), RF=%.2f, RR=%.2f, LF=%.2f, LR=%.2f\n", System.currentTimeMillis() - startTime, r.tick,
+        System.out.printf("T=%s (vs %s), RF=%.2f, RR=%.2f, LF=%.2f, LR=%.2f\n", getNow(), r.tick,
                 r.frontRight, r.backRight, r.frontLeft, r.backLeft);
 
         if(now > this.recordedEndTime) {

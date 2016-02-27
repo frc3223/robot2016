@@ -7,31 +7,22 @@ import static org.mockito.Mockito.*;
 
 public class ReplayerTests {
     @Test
-    public void testIndexOfNext() {
+    public void testReplay() {
         RobotConfiguration conf = mock(RobotConfiguration.class);
-        Replayer replayer = new Replayer(conf);
-        replayer.powers.add(new DriveMotorPowers(3, 4.4, -4.4, 4.4, -4.4));
-        replayer.powers.add(new DriveMotorPowers(13, 4.4, -4.4, 4.4, -4.4));
-        replayer.powers.add(new DriveMotorPowers(13, 4.4, -4.4, 4.4, -4.4));
-        replayer.powers.add(new DriveMotorPowers(23, 4.4, -4.4, 4.4, -4.4));
-        replayer.powers.add(new DriveMotorPowers(33, 4.4, -4.4, 4.4, -4.4));
+        MyReplayer replayer = new MyReplayer(conf);
+        replayer.recordings.put(Long.valueOf(3), new DriveMotorRecording(3, 4.4, -4.4, 4.4, -4.4));
+        replayer.recordings.put(Long.valueOf(13), new DriveMotorRecording(13, 4.4, -4.4, 4.4, -4.4));
+        replayer.recordings.put(Long.valueOf(13), new DriveMotorRecording(13, 4.4, -4.4, 4.4, -4.4));
+        replayer.recordings.put(Long.valueOf(23), new DriveMotorRecording(23, 4.4, -4.4, 4.4, -4.4));
+        replayer.recordings.put(Long.valueOf(33), new DriveMotorRecording(33, 4.4, -4.4, 4.4, -4.4));
 
-        Assert.assertEquals(0, replayer.indexOfNextBelow(1, 0));
-        Assert.assertEquals(0, replayer.indexOfNextAbove(1, 0));
+        replayer.setNow(1);
+        replayer.replayPeriodic();
 
-        Assert.assertEquals(0, replayer.indexOfNextBelow(3, 0));
-        Assert.assertEquals(1, replayer.indexOfNextAbove(3, 0));
+        replayer.setNow(34);
+        replayer.replayPeriodic();
 
-        Assert.assertEquals(0, replayer.indexOfNextBelow(4, 0));
-        Assert.assertEquals(1, replayer.indexOfNextAbove(4, 1));
-
-        Assert.assertEquals(1, replayer.indexOfNextBelow(13, 0));
-        Assert.assertEquals(2, replayer.indexOfNextAbove(13, 0));
-
-        Assert.assertEquals(3, replayer.indexOfNextBelow(24, 3));
-        Assert.assertEquals(4, replayer.indexOfNextAbove(24, 3));
-
-        Assert.assertEquals(4, replayer.indexOfNextBelow(34, 4));
-        Assert.assertEquals(-1, replayer.indexOfNextAbove(34, 4));
+        replayer.setNow(3);
+        replayer.replayPeriodic();
     }
 }
