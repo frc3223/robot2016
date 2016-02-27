@@ -46,7 +46,7 @@ public class MotionProfiler{
     public double step(){
         if(this.step < this.profile.length){
             return this.profile[this.step];
-            this.step++;
+            //this.step++;
         }
         else return 1;
     }

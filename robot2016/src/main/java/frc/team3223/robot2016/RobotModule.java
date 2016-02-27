@@ -34,6 +34,10 @@ public class RobotModule extends IterativeModule implements ITableListener {
     AutonomousMode currentAutonomousMode;
     SillyAimAssist aimAssist;
     RobotConfiguration conf;
+    Recorder recorder;
+    Replayer replayer;
+
+    boolean inRecordingMode = false;
 
     Shooter shooter;
     ArrayList<ToggleButton> toggleButtons;
@@ -62,6 +66,8 @@ public class RobotModule extends IterativeModule implements ITableListener {
         autonomousModes = new HashMap<>();
         currentAutonomousMode = AutonomousMode.DriveToHighGoal;
         conf = new RobotConfiguration(networkTable);
+        recorder = new Recorder(conf);
+        replayer = new Replayer(conf);
 
         initShooter();
         initSimpleDrive();
@@ -190,29 +196,37 @@ public class RobotModule extends IterativeModule implements ITableListener {
     @Override public void teleopInit() {
         conf.publishJoystickConfiguration();
         pushDriveMode(DriveMode.SimpleTank);
+        //recorder.setup("tacos");
+        //replayer.setup("tacos");
     }
 
     @Override
     public void teleopPeriodic() {
-        publishState();
-        conf.toggleButtonsPeriodic();
-        toggleButtons.forEach(tb -> tb.periodic());
+        if(inRecordingMode) {
+            if(recorder.isRecording()) {
+                recorder.record();
+            }
+        }else {
+            publishState();
+            conf.toggleButtonsPeriodic();
+            toggleButtons.forEach(tb -> tb.periodic());
 
-        shooter.teleopPeriodic();
+            shooter.teleopPeriodic();
 
-        switch(driveMode) {
-            case SimpleTank:
-                simpleDrive.drive();
-                break;
-            case RotateToAngle:
-                //rotateToAngle.rotate();
-                break;
-            case PolarFCTank:
-                //ptDrive.driveSingleFieldCentric();
-                break;
-            case AimAssist:
-                //aimAssist.drive();
-                break;
+            switch(driveMode) {
+                case SimpleTank:
+                    simpleDrive.drive();
+                    break;
+                case RotateToAngle:
+                    //rotateToAngle.rotate();
+                    break;
+                case PolarFCTank:
+                    //ptDrive.driveSingleFieldCentric();
+                    break;
+                case AimAssist:
+                    //aimAssist.drive();
+                    break;
+            }
         }
     }
 
@@ -249,7 +263,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
             networkTable.putNumber("shooter_pitch", conf.getShooterPitch());
         }
         networkTable.putString("driveMode", driveMode.toString());
-        networkTable.putNumber("raw_shooter_angle", conf.getShooterGyro().getAngle());
+        //networkTable.putNumber("raw_shooter_angle", conf.getShooterGyro().getAngle());
     }
 
     @Override

@@ -8,8 +8,10 @@ public class DriveMotorPowers {
     public double frontRight;
     public double backLeft;
     public double backRight;
+    public long tick;
 
-    public DriveMotorPowers(double frontLeft, double frontRight, double backLeft, double backRight){
+    public DriveMotorPowers(long tick, double frontLeft, double frontRight, double backLeft, double backRight){
+        this.tick = tick;
         this.frontLeft = frontLeft;
         this.backLeft = backLeft;
         this.frontRight = frontRight;

@@ -41,26 +41,24 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private Talon rollerTalon;
     private Talon leftWindowMotorTalon;
     private Talon rightWindowMotorTalon;
-    private Gyro shooterGyro;
-    private INavX navX;
     private DigitalInput shooterDownLimitSwitch;
 
     private DigitalInput TailLimitSwitch1;
     private Spark TailSpark;
+    private SensorManager sensorManager;
 
 
 
     public RobotConfiguration(NetworkTable networkTable){
         this.networkTable = networkTable;
-        navX = NavXRegistrar.navX();
-        //shooterGyro = new AnalogGyro(0);
-        //shooterDownLimitSwitch = Registrar.digitalInput(0);
+        shooterDownLimitSwitch = Registrar.digitalInput(0);
         initTalons();
         initJoysticks();
         initShooter();
         initButtonPublishers();
-        //TailLimitSwitch1=Registrar.digitalInput(1);
-        //TailSpark=Registrar.spark(1);
+        TailLimitSwitch1=Registrar.digitalInput(1);
+        TailSpark=Registrar.spark(9);
+        sensorManager = new SensorManager();
     }
 
     private void initButtonPublishers() {
@@ -241,15 +239,16 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     }
 
     public double getShooterPitch() {
-        return shooterGyro.getAngle()-navX.getRoll();
+        return sensorManager.getShooterGyro().getAngle()-sensorManager.getNavX().getRoll();
+        //return 0-sensorManager.getNavX().getRoll();
     }
 
     public Gyro getShooterGyro() {
-        return shooterGyro;
+        return sensorManager.getShooterGyro();
     }
 
     public INavX getNavX() {
-        return navX;
+        return sensorManager.getNavX();
     }
 
     public DigitalInput getShooterDownLimitSwitch() {
