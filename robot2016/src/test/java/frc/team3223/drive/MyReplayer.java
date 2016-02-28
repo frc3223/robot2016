@@ -17,4 +17,8 @@ public class MyReplayer extends Replayer{
     public void setNow(long now) {
         this.now = now;
     }
+
+    public void setEndTime(long time) {
+        this.recordedEndTime = time;
+    }
 }
