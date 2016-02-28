@@ -38,6 +38,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     Replayer replayer;
 
     boolean inRecordingMode = false;
+    String recordingName = "recorded";
 
     Shooter shooter;
     ArrayList<ToggleButton> toggleButtons;
@@ -196,8 +197,6 @@ public class RobotModule extends IterativeModule implements ITableListener {
     @Override public void teleopInit() {
         conf.publishJoystickConfiguration();
         pushDriveMode(DriveMode.SimpleTank);
-        //recorder.setup("tacos");
-        //replayer.setup("tacos");
     }
 
     @Override
@@ -270,5 +269,24 @@ public class RobotModule extends IterativeModule implements ITableListener {
     public void valueChanged(ITable table,
             String name, Object value, boolean isNew) {
         System.out.println("received " + name + ": " + value);
+        switch(name) {
+            case "recordMode": {
+                inRecordingMode = (boolean) value;
+                break;
+            }
+            case "recordName": {
+                recordingName = (String) value;
+                recorder.setup(recordingName);
+                break;
+            }
+            case "recording": {
+                boolean recording = (boolean) value;
+                if(recording) {
+                    inRecordingMode = true;
+                    recorder.startRecording();
+                }
+                break;
+            }
+        }
     }
 }

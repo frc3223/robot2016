@@ -30,6 +30,9 @@ public class Recorder {
         context.add("Roll", () -> conf.getNavX().getRoll());
         context.add("Yaw", () -> conf.getNavX().getYaw());
 
+    }
+
+    public void startRecording() {
         startTime = System.currentTimeMillis();
         recording = true;
     }
