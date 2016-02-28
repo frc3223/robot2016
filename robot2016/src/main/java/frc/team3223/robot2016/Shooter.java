@@ -26,8 +26,14 @@ public class Shooter implements ITableListener {
     private NetworkTable networkTable;
 
     boolean hasDesiredPitch = false;
+    String desiredPitchName;
     int pitchState = 0;
     double desiredPitch = 0;
+    int pitchPublishIncrement = 0;
+
+    double bottomPosition = 0;
+    double position1 = 10;
+    double position2 = 30;
 
     int tailState=0;
 
@@ -52,8 +58,10 @@ public class Shooter implements ITableListener {
 
         if (conf.shouldAimUp()){
 			raiseShooter();
+            noDesiredPitch();
 		} else if (conf.shouldAimDown()){
 			lowerShooter();
+            noDesiredPitch();
         } else if(hasDesiredPitch) {
             if(pitchState == 0) {
                 // 0: init - arm needs to go down to zero out shooter gyro
@@ -92,6 +100,7 @@ public class Shooter implements ITableListener {
             conf.getShooterGyro().reset();
         }
         tailPeriodic();
+        publishShooterPosition();
     }
 
 	public boolean shouldMoveShooter(){
@@ -208,6 +217,25 @@ public class Shooter implements ITableListener {
                 arm_roller_out_speed = Math.min(Math.abs(dvalue), 1.0);
                 break;
             }
+            case "shooterPosition": {
+                if(value.equals("bottom")){
+                    hasDesiredPitch = true;
+                    desiredPitch = bottomPosition;
+                    desiredPitchName = (String) value;
+                }else if(value.equals("pos1")) {
+                    hasDesiredPitch = true;
+                    desiredPitch = position1;
+                    desiredPitchName = (String) value;
+                }else if(value.equals("pos2")) {
+                    hasDesiredPitch = true;
+                    desiredPitch = position2;
+                    desiredPitchName = (String) value;
+                }else{
+                    noDesiredPitch();
+                }
+
+                break;
+            }
         }
     }
 
@@ -216,6 +244,21 @@ public class Shooter implements ITableListener {
         networkTable.putNumber("arm_pitch_down_speed", getArmPitchDownSpeed());
         networkTable.putNumber("arm_roller_out_speed", getArmRollerOutSpeed());
         networkTable.putNumber("arm_roller_in_speed", getArmRollerInSpeed());
+    }
+
+    public void publishShooterPosition() {
+        pitchPublishIncrement++;
+        // publish once every half second or so
+        if(pitchPublishIncrement % 30 == 1) {
+            networkTable.putString("shooterArmPitch", desiredPitchName);
+            pitchPublishIncrement = 0;
+        }
+
+    }
+
+    public void noDesiredPitch() {
+        hasDesiredPitch = false;
+        desiredPitchName = "none";
     }
 
     public void raiseShooter() {
