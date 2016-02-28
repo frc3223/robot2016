@@ -13,8 +13,8 @@ import java.util.HashMap;
 
 public class Replayer {
     public HashMap<Long,DriveMotorRecording> recordings;
-    private RobotConfiguration conf;
-    private boolean replaying = false;
+    public RobotConfiguration conf;
+    protected boolean replaying = false;
     private long startTime;
     protected long recordedEndTime;
     private int currentIndex;
@@ -33,18 +33,18 @@ public class Replayer {
         long now = getNow();
         DriveMotorRecording r1, r2;
 
-        long startTime = now;
-        long nextTime = now;
+        long recordedPrev = now;
+        long recordedNext = now;
 
-        while(!this.recordings.containsKey(startTime) && startTime >= 0){
-            startTime--;
+        while(!this.recordings.containsKey(recordedPrev) && recordedPrev >= 0){
+            recordedPrev--;
         }
-        r1 = (startTime > 0) ?  this.recordings.get(startTime):new DriveMotorRecording(0,0,0,0,0);
+        r1 = (recordedPrev > 0) ?  this.recordings.get(recordedPrev):new DriveMotorRecording(0,0,0,0,0);
 
-        while(!this.recordings.containsKey(nextTime) && nextTime <= this.recordedEndTime){
-            nextTime++;
+        while(!this.recordings.containsKey(recordedNext) && recordedNext <= this.recordedEndTime){
+            recordedNext++;
         }
-        r2 = (nextTime <= this.recordedEndTime) ? this.recordings.get(nextTime) : new DriveMotorRecording(now,0,0,0,0);
+        r2 = (recordedNext <= this.recordedEndTime) ? this.recordings.get(recordedNext) : new DriveMotorRecording(now,0,0,0,0);
 
         DriveMotorRecording r = r1.interpolate(now,r2);
 

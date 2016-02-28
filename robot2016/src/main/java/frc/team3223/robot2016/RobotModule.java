@@ -201,12 +201,14 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     @Override
     public void teleopPeriodic() {
+        publishState();
         if(inRecordingMode) {
             if(recorder.isRecording()) {
                 recorder.record();
+            }else{
+                conf.stopMotors();
             }
         }else {
-            publishState();
             conf.toggleButtonsPeriodic();
             toggleButtons.forEach(tb -> tb.periodic());
 

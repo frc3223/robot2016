@@ -5,6 +5,7 @@ import frc.team3223.robot2016.RobotConfiguration;
 public class MyReplayer extends Replayer{
     public MyReplayer(RobotConfiguration conf) {
         super(conf);
+        replaying = true;
     }
 
     long now;

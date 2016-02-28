@@ -257,4 +257,11 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     public DigitalInput getTailLimitSwitch1() {return TailLimitSwitch1;}
 
     public Spark getTailSpark() {return TailSpark;}
+
+    public void stopMotors() {
+        getFrontLeftTalon().set(0);
+        getFrontRightTalon().set(0);
+        getRearLeftTalon().set(0);
+        getRearLeftTalon().set(0);
+    }
 }

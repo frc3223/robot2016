@@ -1,8 +1,5 @@
 package frc.team3223.robot2016;
 
-import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.Spark;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
@@ -22,6 +19,9 @@ public class Shooter implements ITableListener {
     double arm_roller_out_dir = -1;
     double arm_roller_in_speed = 1;
     double arm_roller_in_dir = 1;
+
+    double tail_speed = 1;
+    double tail_out_dir = 1;
     private RobotConfiguration conf;
     private NetworkTable networkTable;
 
@@ -88,12 +88,10 @@ public class Shooter implements ITableListener {
             stopRaiser();
         }
 
-        /*
         if(conf.getShooterDownLimitSwitch().get()) {
             conf.getShooterGyro().reset();
         }
-        tailperiodic();
-        */
+        tailPeriodic();
     }
 
 	public boolean shouldMoveShooter(){
@@ -105,18 +103,17 @@ public class Shooter implements ITableListener {
         conf.getRightShooterTalon().set(-getShootSpeed());
     }
 
-    public void tailperiodic(){
+    public void tailPeriodic(){
         if (tailState==0) {
-            conf.getTailSpark().set(-1);
+            conf.getTailSpark().set(getTailInSpeed());
 
             if (conf.shouldShoot()){
                 tailState=1;
-
             }
 
         }
         else if (tailState==1){
-            conf.getTailSpark().set(1);
+            conf.getTailSpark().set(getTailOutSpeed());
             if (conf.getTailLimitSwitch1().get()){
                 tailState=0;
             }
@@ -164,6 +161,14 @@ public class Shooter implements ITableListener {
         return Math.copySign(arm_roller_in_speed, arm_roller_in_dir);
     }
 
+    public double getTailOutSpeed() {
+        return Math.copySign(tail_speed, tail_out_dir);
+    }
+
+    public double getTailInSpeed() {
+        return Math.copySign(tail_speed, -tail_out_dir);
+    }
+
     @Override
     public void valueChanged(ITable table,
                              String name, Object value, boolean isNew) {
@@ -176,6 +181,11 @@ public class Shooter implements ITableListener {
             case "shootSpeed": {
                 double dvalue = (double) value;
                 slurpSpeed = Math.min(Math.abs(dvalue), 1.0);
+                break;
+            }
+            case "tailSpeed": {
+                double dvalue = (double) value;
+                tail_speed = Math.min(Math.abs(dvalue), 1.0);
                 break;
             }
             case "arm_pitch_up_speed": {
