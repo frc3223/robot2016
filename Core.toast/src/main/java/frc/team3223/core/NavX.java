@@ -1,19 +1,7 @@
 package frc.team3223.core;
 
-import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.wpilibj.SPI;
-import jaci.openrio.toast.lib.module.ToastModule;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 
-public class NavX {
-    private static AHRS navX;
-
-    /**
-     * Return the NavX instance, creating it if necessary
-     */
-    public static AHRS navX() {
-        if (navX == null) {
-            navX = new AHRS(SPI.Port.kMXP);
-        }
-        return navX;
-    }
+public interface NavX extends Gyro, Accelerometer {
 }
