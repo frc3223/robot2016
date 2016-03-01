@@ -1,5 +1,6 @@
 package frc.team3223.robot2016;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
@@ -201,7 +202,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     @Override
     public void teleopPeriodic() {
-        publishState();
+        /*publishState();
         if(inRecordingMode) {
             if(recorder.isRecording()) {
                 recorder.record();
@@ -228,7 +229,8 @@ public class RobotModule extends IterativeModule implements ITableListener {
                     //aimAssist.drive();
                     break;
             }
-        }
+        }*/
+        simpleDrive.drive(-conf.getLeftJoystick().getAxis(Joystick.AxisType.kY), conf.getRightJoystick().getAxis(Joystick.AxisType.kY));
     }
 
     @Override

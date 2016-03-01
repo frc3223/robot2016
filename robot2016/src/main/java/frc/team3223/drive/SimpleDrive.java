@@ -14,7 +14,7 @@ import frc.team3223.robot2016.RobotConfiguration;
  * from running a tiny amount when the user isn't doing anything with the joysticks
  */
 public class SimpleDrive implements IDrive{
-    private RobotDrive drive;
+    public RobotDrive drive;
     private NetworkTable networkTable;
 
     private double maxSpeedModifier;
