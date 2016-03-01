@@ -233,6 +233,8 @@ public class RobotModule extends IterativeModule implements ITableListener {
         simpleDrive.drive(-conf.getLeftJoystick().getAxis(Joystick.AxisType.kY), conf.getRightJoystick().getAxis(Joystick.AxisType.kY));
     }
 
+
+
     @Override
     public void testPeriodic() {
         conf.toggleButtonsPeriodic();
