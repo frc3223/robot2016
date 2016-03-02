@@ -106,15 +106,17 @@ public class Replayer {
                     if(time > this.recordedEndTime) this.recordedEndTime = time;
                 }
             }
-
-            replaying = true;
-            startTime = System.currentTimeMillis();
-            currentIndex = 0;
         }catch (IOException ex) {
 
         }catch(Exception ex) {
             // probably bad file
         }
+    }
+
+    public void start() {
+        replaying = true;
+        startTime = System.currentTimeMillis();
+        currentIndex = 0;
     }
 
     public boolean isReplaying() {

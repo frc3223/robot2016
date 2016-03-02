@@ -172,22 +172,22 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
     @Override
     public Talon getFrontLeftTalon() {
-        return talons.get(0);
-    }
-
-    @Override
-    public Talon getRearLeftTalon() {
-        return talons.get(1);
-    }
-
-    @Override
-    public Talon getFrontRightTalon() {
         return talons.get(2);
     }
 
     @Override
-    public Talon getRearRightTalon() {
+    public Talon getRearLeftTalon() {
         return talons.get(3);
+    }
+
+    @Override
+    public Talon getFrontRightTalon() {
+        return talons.get(0);
+    }
+
+    @Override
+    public Talon getRearRightTalon() {
+        return talons.get(1);
     }
 
     public Talon getLeftShooterTalon() {

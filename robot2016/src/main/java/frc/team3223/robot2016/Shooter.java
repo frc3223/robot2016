@@ -62,6 +62,7 @@ public class Shooter implements ITableListener {
 		} else if (conf.shouldAimDown()){
 			lowerShooter();
             noDesiredPitch();
+            /*
         } else if(hasDesiredPitch) {
             if(pitchState == 0) {
                 // 0: init - arm needs to go down to zero out shooter gyro
@@ -92,15 +93,18 @@ public class Shooter implements ITableListener {
             }else {
                 stopRaiser();
             }
+            */
         }else{
             stopRaiser();
         }
 
+        /*
         if(conf.getShooterDownLimitSwitch().get()) {
             conf.getShooterGyro().reset();
         }
         tailPeriodic();
         publishShooterPosition();
+        */
     }
 
 	public boolean shouldMoveShooter(){
@@ -113,7 +117,9 @@ public class Shooter implements ITableListener {
     }
 
     public void tailPeriodic(){
+        System.out.println("enter tail periodic");
         if (tailState==0) {
+            System.out.println("tail in");
             conf.getTailSpark().set(getTailInSpeed());
 
             if (conf.shouldShoot()){
@@ -122,11 +128,13 @@ public class Shooter implements ITableListener {
 
         }
         else if (tailState==1){
+            System.out.println("tail out");
             conf.getTailSpark().set(getTailOutSpeed());
             if (conf.getTailLimitSwitch1().get()){
                 tailState=0;
             }
         }
+        System.out.println("exit tail periodic");
     }
 
     public void slurp() {
@@ -277,5 +285,6 @@ public class Shooter implements ITableListener {
         System.out.println("Stopping raise");
         conf.getRightWindowMotorTalon().set(0.);
         conf.getLeftWindowMotorTalon().set(0.);
+        System.out.println("Stopped raise");
     }
 }

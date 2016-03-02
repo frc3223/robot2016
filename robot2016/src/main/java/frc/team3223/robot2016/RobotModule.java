@@ -183,27 +183,37 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
         // tell raspi to begin logging sensor data
         networkTable.putNumber("autonomousBegin", autoBegin++);
+
+        replayer.setup("auto");
+        replayer.start();
     }
 
     @Override
     public void autonomousPeriodic() {
         publishState();
 
+        if(replayer.isReplaying()) {
+            replayer.replayPeriodic();
+        }
+
+        /*
         conf.toggleButtonsPeriodic();
         if (currentAutonomousMode == AutonomousMode.DriveToHighGoal) {
             this.driveToHighGoal.autonomousPeriodic();
         }
+        */
     }
 
     @Override public void teleopInit() {
         conf.publishJoystickConfiguration();
         pushDriveMode(DriveMode.SimpleTank);
+        simpleDrive.drive(0,0);
     }
 
     @Override
     public void teleopPeriodic() {
-        /*publishState();
-        if(inRecordingMode) {
+        publishState();
+        if(inRecordingMode && false) {
             if(recorder.isRecording()) {
                 recorder.record();
             }else{
@@ -229,8 +239,8 @@ public class RobotModule extends IterativeModule implements ITableListener {
                     //aimAssist.drive();
                     break;
             }
-        }*/
-        simpleDrive.drive(-conf.getLeftJoystick().getAxis(Joystick.AxisType.kY), conf.getRightJoystick().getAxis(Joystick.AxisType.kY));
+        }
+        //simpleDrive.drive(-conf.getLeftJoystick().getAxis(Joystick.AxisType.kY), conf.getRightJoystick().getAxis(Joystick.AxisType.kY));
     }
 
     @Override

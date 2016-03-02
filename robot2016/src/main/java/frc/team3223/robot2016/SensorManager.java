@@ -22,7 +22,7 @@ public class SensorManager {
     private INavX navX;
 
     public SensorManager(){
-        this.accelerometer = new ADXL362(SensorManager.ACCELEROMETER_PORT, Accelerometer.Range.k2G);
+        //this.accelerometer = new ADXL362(SensorManager.ACCELEROMETER_PORT, Accelerometer.Range.k2G);
         navX = NavXRegistrar.navX();
         shooterGyro = new AnalogGyro(0);
     }
