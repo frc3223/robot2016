@@ -92,8 +92,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         /* assigning joystick buttons to names to be displayed in the dashboard
          * left = leftJoystick : right = rightJoystick
          */
-        networkTable.putString("left_" + shootButton, "fire");
-        networkTable.putString("right_" + slurpButton, "get ball");
+        networkTable.putString("right_" + shootButton, "fire");
+        networkTable.putString("left_" + slurpButton, "get ball");
         networkTable.putString("right_" + simpleDriveReverseButton, "reverse tank drive");
         networkTable.putString("left_" + shooterUpButton, "aim up");
         networkTable.putString("left_" + shooterDownButton, "aim down");
@@ -105,11 +105,11 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
 
     public boolean shouldShoot() {
-        return leftJoystick.getRawButton(shootButton);
+        return rightJoystick.getRawButton(shootButton);
     }
 
     public boolean shouldSlurp() {
-        return rightJoystick.getRawButton(slurpButton);
+        return leftJoystick.getRawButton(slurpButton);
     }
 
     public boolean shouldAimUp(){
@@ -215,14 +215,6 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
     public Joystick getRightJoystick() {
         return rightJoystick;
-    }
-
-    public ToggleButton makeAimAssistToggle() {
-        return new ToggleButton(leftJoystick, aimAssistButton);
-    }
-
-    public boolean shouldAimAssist() {
-        return leftJoystick.getRawButton(aimAssistButton);
     }
 
     public ToggleButton makePolarDriveToggle() {

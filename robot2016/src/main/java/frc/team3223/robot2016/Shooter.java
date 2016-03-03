@@ -24,7 +24,7 @@ public class Shooter implements ITableListener {
         this.stateStartTime = currentTime;
     }
 
-    public double slurpSpeed = .78;
+    public double slurpSpeed = .4;
     public double slurpDirection = 1;
     public double shootSpeed = 1;
     public double shootDirection = -1;
@@ -40,7 +40,7 @@ public class Shooter implements ITableListener {
     double arm_roller_in_dir = 1;
 
     double tail_speed = 1;
-    double tail_out_dir = 1;
+    double tail_out_dir = -1;
     private RobotConfiguration conf;
     private NetworkTable networkTable;
 
@@ -54,6 +54,8 @@ public class Shooter implements ITableListener {
     double position1 = 10;
     double position2 = 30;
 
+    private long stateStartTime;
+
     public Shooter(RobotConfiguration conf, NetworkTable networkTable) {
 
         this.conf = conf;
@@ -61,7 +63,8 @@ public class Shooter implements ITableListener {
     }
 
     public void teleopPeriodic() {
-        final long currentTime = System.currentTimeMillis();
+        long currentTime = System.currentTimeMillis();
+        System.out.println(this.getState());
         switch (this.getState()) {
             case IDLE:
                 stopShooter();
@@ -80,9 +83,13 @@ public class Shooter implements ITableListener {
                 if (conf.shouldShoot()) {
                     this.setStateAndStart(State.SHOOTING, currentTime);
                 }
+                else if(conf.shouldSlurp()){
+                    this.setStateAndStart(State.SLURPING,currentTime);
+                }
+                break;
             case SHOOTING:
-                shoot(currentTime - stateStartTime > 250, conf.getTailLimitSwitch1().get());
-                if (currentTime - stateStartTime > 1500) {
+                shoot(currentTime - stateStartTime > 250, true);
+                if (currentTime - stateStartTime > 3500) {
                     this.setStateAndStart(State.IDLE, currentTime);
                 }
                 break;
@@ -146,12 +153,10 @@ public class Shooter implements ITableListener {
         return false;
     }
 
-    private long stateStartTime;
-
     public void shoot(final boolean atSpeed, final boolean flickTail) {
         conf.getLeftShooterTalon().set(getShootSpeed());
         conf.getRightShooterTalon().set(-getShootSpeed());
-        conf.getTailSpark().set(atSpeed && flickTail ? getTailOutSpeed() : 0);
+        conf.getTailSpark().set((atSpeed && flickTail ) ? getTailOutSpeed() : 0);
     }
 
     public void slurp() {
@@ -305,4 +310,6 @@ public class Shooter implements ITableListener {
         conf.getLeftWindowMotorTalon().set(0.);
         System.out.println("Stopped raise");
     }
+
+
 }
