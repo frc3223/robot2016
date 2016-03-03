@@ -5,16 +5,12 @@ import frc.team3223.drive.PolarTankDrive;
 /**
  * Created by Samantha on 2/17/2016.
  */
-public class DriveToHighGoal implements IAutonomous {
-    int defenseNumber;
+public class DriveForward implements IAutonomous {
     PolarTankDrive drive;
-    int highGoal;
     long time;
 
-    public DriveToHighGoal(int defenseNumber, PolarTankDrive drive, int highGoal){
-        this.defenseNumber = defenseNumber;
+    public DriveForward(PolarTankDrive drive) {
         this.drive = drive;
-        this.highGoal = highGoal;
     }
 
     @Override
@@ -25,7 +21,6 @@ public class DriveToHighGoal implements IAutonomous {
     @Override
     public void autonomousPeriodic() {
         long now = System.currentTimeMillis();
-
     }
 
     @Override
