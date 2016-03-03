@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
+import frc.team3223.autonomous.DriveForward;
 import frc.team3223.autonomous.DriveToHighGoal;
 import frc.team3223.autonomous.IAutonomous;
 import frc.team3223.drive.*;
@@ -32,6 +33,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     Map<DriveMode, IDrive> driveModes;
     Map<AutonomousMode, IAutonomous> autonomousModes;
     DriveToHighGoal driveToHighGoal;
+    DriveForward driveForward;
     AutonomousMode currentAutonomousMode;
     SillyAimAssist aimAssist;
     RobotConfiguration conf;
@@ -47,6 +49,8 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     double desiredHeading = 0.00;
     private int autoBegin = 0;
+
+    long clock;
 
     @Override
     public String getModuleName() {
@@ -180,30 +184,42 @@ public class RobotModule extends IterativeModule implements ITableListener {
     public void autonomousInit() {
         shooter.publishValues();
         conf.publishJoystickConfiguration();
-
+        this.clock = System.currentTimeMillis();
         // tell raspi to begin logging sensor data
         networkTable.putNumber("autonomousBegin", autoBegin++);
+
+        replayer.setup("auto");
+        replayer.start();
     }
 
     @Override
     public void autonomousPeriodic() {
         publishState();
 
+        if(replayer.isReplaying()) {
+            replayer.replayPeriodic();
+        }
+
+        /*
         conf.toggleButtonsPeriodic();
         if (currentAutonomousMode == AutonomousMode.DriveToHighGoal) {
             this.driveToHighGoal.autonomousPeriodic();
+        } else if (currentAutonomousMode == AutonomousMode.DriveForward) {
+            this.driveForward.autonomousPeriodic();
         }
+        */
     }
 
     @Override public void teleopInit() {
         conf.publishJoystickConfiguration();
         pushDriveMode(DriveMode.SimpleTank);
+        simpleDrive.drive(0,0);
     }
 
     @Override
     public void teleopPeriodic() {
-        /*publishState();
-        if(inRecordingMode) {
+        publishState();
+        if(inRecordingMode && false) {
             if(recorder.isRecording()) {
                 recorder.record();
             }else{
@@ -229,8 +245,8 @@ public class RobotModule extends IterativeModule implements ITableListener {
                     //aimAssist.drive();
                     break;
             }
-        }*/
-        simpleDrive.drive(-conf.getLeftJoystick().getAxis(Joystick.AxisType.kY), conf.getRightJoystick().getAxis(Joystick.AxisType.kY));
+        }
+        //simpleDrive.drive(-conf.getLeftJoystick().getAxis(Joystick.AxisType.kY), conf.getRightJoystick().getAxis(Joystick.AxisType.kY));
     }
 
 

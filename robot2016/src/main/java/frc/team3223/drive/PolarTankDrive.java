@@ -21,10 +21,9 @@ import java.util.function.Supplier;
  *    distance of the desired heading, turn robot while moving forward,
  *    otherwise rotate the robot in place.
  */
-public class PolarTankDrive implements IDrive, MotorSafety {
+public class PolarTankDrive implements IDrive {
 
     public static Logger logger;
-    protected MotorSafetyHelper m_safetyHelper;
     private NetworkTable networkTable;
     private Gyro gyro;
     private ISpeedControllerProvider driveProvider;
@@ -49,14 +48,7 @@ public class PolarTankDrive implements IDrive, MotorSafety {
         this.driveProvider = driveProvider;
         this.networkTable = networkTable;
         this.rotateThreshold = 10;
-        setupMotorSafety();
         disable();
-    }
-
-    private void setupMotorSafety() {
-        m_safetyHelper = new MotorSafetyHelper(this);
-        m_safetyHelper.setExpiration(kDefaultExpirationTime);
-        m_safetyHelper.setSafetyEnabled(true);
     }
 
     public void takeInitialHeading() {
@@ -150,8 +142,6 @@ public class PolarTankDrive implements IDrive, MotorSafety {
             sc.setInverted(false);
             sc.set(speed.snd);
         });
-
-        m_safetyHelper.feed();
     }
 
     public Joystick getDirectionJoystick() {
@@ -217,48 +207,12 @@ public class PolarTankDrive implements IDrive, MotorSafety {
 
     @Override
     public void enable() {
-        m_safetyHelper.setSafetyEnabled(true);
+        //m_safetyHelper.setSafetyEnabled(true);
     }
 
     @Override
     public void disable() {
         //m_safetyHelper.setSafetyEnabled(false);
 
-    }
-
-    @Override
-    public void setExpiration(double timeout) {
-        m_safetyHelper.setExpiration(timeout);
-
-    }
-
-    @Override
-    public double getExpiration() {
-        return m_safetyHelper.getExpiration();
-    }
-
-    @Override
-    public boolean isAlive() {
-        return m_safetyHelper.isAlive();
-    }
-
-    @Override
-    public void stopMotor() {
-        drive(0, 0);
-    }
-
-    @Override
-    public void setSafetyEnabled(boolean enabled) {
-        m_safetyHelper.setSafetyEnabled(enabled);
-    }
-
-    @Override
-    public boolean isSafetyEnabled() {
-        return m_safetyHelper.isSafetyEnabled();
-    }
-
-    @Override
-    public String getDescription() {
-        return "Polar Field Centric Tank Drive";
     }
 }

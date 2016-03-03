@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import frc.team3223.drive.ISpeedControllerProvider;
 import frc.team3223.navx.INavX;
-import frc.team3223.navx.NavXRegistrar;
 import frc.team3223.util.ToggleButton;
 import jaci.openrio.toast.lib.registry.Registrar;
 
@@ -43,8 +42,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private Talon rightWindowMotorTalon;
     private DigitalInput shooterDownLimitSwitch;
 
-    private DigitalInput TailLimitSwitch1;
-    private Spark TailSpark;
+    private DigitalInput tailLimitSwitch1;
+    private Spark tailSpark;
     private SensorManager sensorManager;
 
 
@@ -56,8 +55,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         initJoysticks();
         initShooter();
         initButtonPublishers();
-        TailLimitSwitch1=Registrar.digitalInput(1);
-        TailSpark=Registrar.spark(9);
+        tailLimitSwitch1 =Registrar.digitalInput(1);
+        tailSpark =Registrar.spark(9);
         sensorManager = new SensorManager();
     }
 
@@ -172,22 +171,22 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
     @Override
     public Talon getFrontLeftTalon() {
-        return talons.get(0);
-    }
-
-    @Override
-    public Talon getRearLeftTalon() {
-        return talons.get(1);
-    }
-
-    @Override
-    public Talon getFrontRightTalon() {
         return talons.get(2);
     }
 
     @Override
-    public Talon getRearRightTalon() {
+    public Talon getRearLeftTalon() {
         return talons.get(3);
+    }
+
+    @Override
+    public Talon getFrontRightTalon() {
+        return talons.get(0);
+    }
+
+    @Override
+    public Talon getRearRightTalon() {
+        return talons.get(1);
     }
 
     public Talon getLeftShooterTalon() {
@@ -254,9 +253,9 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     public DigitalInput getShooterDownLimitSwitch() {
         return shooterDownLimitSwitch;
     }
-    public DigitalInput getTailLimitSwitch1() {return TailLimitSwitch1;}
+    public DigitalInput getTailLimitSwitch1() {return tailLimitSwitch1;}
 
-    public Spark getTailSpark() {return TailSpark;}
+    public Spark getTailSpark() {return tailSpark;}
 
     public void stopMotors() {
         getFrontLeftTalon().set(0);

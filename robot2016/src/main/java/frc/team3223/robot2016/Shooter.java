@@ -5,6 +5,25 @@ import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
 
 public class Shooter implements ITableListener {
+    public static enum State {
+        IDLE, SLURPING, LOADED, SHOOTING
+    }
+
+    private State state = State.IDLE;
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public void setStateAndStart(State state, long currentTime) {
+        setState(state);
+        this.stateStartTime = currentTime;
+    }
+
     public double slurpSpeed = .78;
     public double slurpDirection = 1;
     public double shootSpeed = 1;
@@ -35,8 +54,6 @@ public class Shooter implements ITableListener {
     double position1 = 10;
     double position2 = 30;
 
-    int tailState=0;
-
     public Shooter(RobotConfiguration conf, NetworkTable networkTable) {
 
         this.conf = conf;
@@ -44,33 +61,53 @@ public class Shooter implements ITableListener {
     }
 
     public void teleopPeriodic() {
-        if (conf.shouldShoot()) {
-            shoot();
-        } else if (conf.shouldSlurp()) {
-            slurp();
-        } else {
-            stopShooter();
+        final long currentTime = System.currentTimeMillis();
+        switch (this.getState()) {
+            case IDLE:
+                stopShooter();
+                if (conf.shouldSlurp()) {
+                    this.setStateAndStart(State.SLURPING, currentTime);
+                }
+                break;
+            case SLURPING:
+                slurp();
+                if (currentTime - stateStartTime > 3000) {
+                    this.setStateAndStart(State.LOADED, currentTime);
+                }
+                break;
+            case LOADED:
+                stopShooter();
+                if (conf.shouldShoot()) {
+                    this.setStateAndStart(State.SHOOTING, currentTime);
+                }
+            case SHOOTING:
+                shoot(currentTime - stateStartTime > 250, conf.getTailLimitSwitch1().get());
+                if (currentTime - stateStartTime > 1500) {
+                    this.setStateAndStart(State.IDLE, currentTime);
+                }
+                break;
         }
 
         double angleThreshold = 3.0;
         // convention: getShooterPitch returns zero when arm is level, positive value
         // as arm goes up.
 
-        if (conf.shouldAimUp()){
-			raiseShooter();
+        if (conf.shouldAimUp()) {
+            raiseShooter();
             noDesiredPitch();
-		} else if (conf.shouldAimDown()){
-			lowerShooter();
+        } else if (conf.shouldAimDown()) {
+            lowerShooter();
             noDesiredPitch();
-        } else if(hasDesiredPitch) {
-            if(pitchState == 0) {
+            /*
+        } else if (hasDesiredPitch) {
+            if (pitchState == 0) {
                 // 0: init - arm needs to go down to zero out shooter gyro
                 lowerShooter();
 
                 if (conf.getShooterDownLimitSwitch().get()) {
                     pitchState = 1;
                 }
-            }else if(pitchState == 1) {
+            } else if (pitchState == 1) {
                 // 1: at bottom - reset shooter gyro and turn off window motors
                 conf.getShooterGyro().reset();
                 stopRaiser();
@@ -78,55 +115,43 @@ public class Shooter implements ITableListener {
                 if (desiredPitch > conf.getShooterPitch()) {
                     pitchState = 2;
                 }
-            }else if(pitchState == 2) {
+            } else if (pitchState == 2) {
                 // 2: going up! hope desired pitch isn't past
                 raiseShooter();
 
-                if(desiredPitch - conf.getShooterPitch() < angleThreshold ) {
+                if (desiredPitch - conf.getShooterPitch() < angleThreshold) {
                     pitchState = 3;
                 }
-            }else if(conf.getShooterPitch() - desiredPitch > 3){
+            } else if (conf.getShooterPitch() - desiredPitch > 3) {
                 lowerShooter();
-            }else if(desiredPitch - conf.getShooterPitch() > 3) {
+            } else if (desiredPitch - conf.getShooterPitch() > 3) {
                 raiseShooter();
-            }else {
+            } else {
                 stopRaiser();
             }
-        }else{
+            */
+        } else {
             stopRaiser();
         }
 
-        if(conf.getShooterDownLimitSwitch().get()) {
+        /*
+        if (conf.getShooterDownLimitSwitch().get()) {
             conf.getShooterGyro().reset();
         }
-        tailPeriodic();
         publishShooterPosition();
+        */
     }
 
-	public boolean shouldMoveShooter(){
+    public boolean shouldMoveShooter() {
         return false;
-	}
+    }
 
-    public void shoot() {
+    private long stateStartTime;
+
+    public void shoot(final boolean atSpeed, final boolean flickTail) {
         conf.getLeftShooterTalon().set(getShootSpeed());
         conf.getRightShooterTalon().set(-getShootSpeed());
-    }
-
-    public void tailPeriodic(){
-        if (tailState==0) {
-            conf.getTailSpark().set(getTailInSpeed());
-
-            if (conf.shouldShoot()){
-                tailState=1;
-            }
-
-        }
-        else if (tailState==1){
-            conf.getTailSpark().set(getTailOutSpeed());
-            if (conf.getTailLimitSwitch1().get()){
-                tailState=0;
-            }
-        }
+        conf.getTailSpark().set(atSpeed && flickTail ? getTailOutSpeed() : 0);
     }
 
     public void slurp() {
@@ -139,6 +164,7 @@ public class Shooter implements ITableListener {
         conf.getRightShooterTalon().set(0.);
         conf.getLeftShooterTalon().set(0.);
         conf.getRollerTalon().set(0.);
+        conf.getTailSpark().set(getTailInSpeed());
     }
 
     public double getShootSpeed() {
@@ -181,7 +207,7 @@ public class Shooter implements ITableListener {
     @Override
     public void valueChanged(ITable table,
                              String name, Object value, boolean isNew) {
-        switch(name) {
+        switch (name) {
             case "slurpSpeed": {
                 double dvalue = (double) value;
                 slurpSpeed = Math.min(Math.abs(dvalue), 1.0);
@@ -218,19 +244,19 @@ public class Shooter implements ITableListener {
                 break;
             }
             case "shooterPosition": {
-                if(value.equals("bottom")){
+                if (value.equals("bottom")) {
                     hasDesiredPitch = true;
                     desiredPitch = bottomPosition;
                     desiredPitchName = (String) value;
-                }else if(value.equals("pos1")) {
+                } else if (value.equals("pos1")) {
                     hasDesiredPitch = true;
                     desiredPitch = position1;
                     desiredPitchName = (String) value;
-                }else if(value.equals("pos2")) {
+                } else if (value.equals("pos2")) {
                     hasDesiredPitch = true;
                     desiredPitch = position2;
                     desiredPitchName = (String) value;
-                }else{
+                } else {
                     noDesiredPitch();
                 }
 
@@ -249,7 +275,7 @@ public class Shooter implements ITableListener {
     public void publishShooterPosition() {
         pitchPublishIncrement++;
         // publish once every half second or so
-        if(pitchPublishIncrement % 30 == 1) {
+        if (pitchPublishIncrement % 30 == 1) {
             networkTable.putString("shooterArmPitch", desiredPitchName);
             pitchPublishIncrement = 0;
         }
@@ -277,5 +303,6 @@ public class Shooter implements ITableListener {
         System.out.println("Stopping raise");
         conf.getRightWindowMotorTalon().set(0.);
         conf.getLeftWindowMotorTalon().set(0.);
+        System.out.println("Stopped raise");
     }
 }
