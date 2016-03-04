@@ -43,7 +43,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private DigitalInput shooterDownLimitSwitch;
 
     private DigitalInput tailLimitSwitch1;
-    private Spark tailSpark;
+    private SpeedController tailMotor;
     private SensorManager sensorManager;
 
 
@@ -55,8 +55,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         initJoysticks();
         initShooter();
         initButtonPublishers();
-        tailLimitSwitch1 =Registrar.digitalInput(1);
-        tailSpark =Registrar.spark(9);
+        tailLimitSwitch1 = Registrar.digitalInput(1);
+        tailMotor = Registrar.talon(9);
         sensorManager = new SensorManager();
     }
 
@@ -217,6 +217,11 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         return rightJoystick;
     }
 
+    public ToggleButton makeAimAssistToggle() {
+        return new ToggleButton(leftJoystick, aimAssistButton);
+    }
+
+
     public ToggleButton makePolarDriveToggle() {
         return new ToggleButton(getLeftJoystick(), polarDriveButton);
     }
@@ -247,7 +252,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     }
     public DigitalInput getTailLimitSwitch1() {return tailLimitSwitch1;}
 
-    public Spark getTailSpark() {return tailSpark;}
+    public SpeedController getTailMotor() {return tailMotor;}
 
     public void stopMotors() {
         getFrontLeftTalon().set(0);

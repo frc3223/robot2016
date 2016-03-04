@@ -64,7 +64,6 @@ public class Shooter implements ITableListener {
 
     public void teleopPeriodic() {
         long currentTime = System.currentTimeMillis();
-        System.out.println(this.getState());
         switch (this.getState()) {
             case IDLE:
                 stopShooter();
@@ -156,7 +155,7 @@ public class Shooter implements ITableListener {
     public void shoot(final boolean atSpeed, final boolean flickTail) {
         conf.getLeftShooterTalon().set(getShootSpeed());
         conf.getRightShooterTalon().set(-getShootSpeed());
-        conf.getTailSpark().set((atSpeed && flickTail ) ? getTailOutSpeed() : 0);
+        conf.getTailMotor().set((atSpeed && flickTail ) ? getTailOutSpeed() : 0);
     }
 
     public void slurp() {
@@ -169,7 +168,7 @@ public class Shooter implements ITableListener {
         conf.getRightShooterTalon().set(0.);
         conf.getLeftShooterTalon().set(0.);
         conf.getRollerTalon().set(0.);
-        conf.getTailSpark().set(getTailInSpeed());
+        conf.getTailMotor().set(getTailInSpeed());
     }
 
     public double getShootSpeed() {
@@ -305,10 +304,10 @@ public class Shooter implements ITableListener {
     }
 
     public void stopRaiser() {
-        System.out.println("Stopping raise");
+//        System.out.println("Stopping raise");
         conf.getRightWindowMotorTalon().set(0.);
         conf.getLeftWindowMotorTalon().set(0.);
-        System.out.println("Stopped raise");
+//        System.out.println("Stopped raise");
     }
 
 

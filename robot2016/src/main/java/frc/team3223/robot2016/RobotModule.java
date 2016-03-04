@@ -48,7 +48,6 @@ public class RobotModule extends IterativeModule implements ITableListener {
     boolean shouldRotate = false;
 
     double desiredHeading = 0.00;
-    private int autoBegin = 0;
 
     long clock;
 
@@ -180,6 +179,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
         return !ToastBootstrap.isSimulation;
     }
 
+    long autoBegin;
     @Override
     public void autonomousInit() {
         shooter.publishValues();
@@ -188,17 +188,27 @@ public class RobotModule extends IterativeModule implements ITableListener {
         // tell raspi to begin logging sensor data
         networkTable.putNumber("autonomousBegin", autoBegin++);
 
-        replayer.setup("auto");
-        replayer.start();
+        //replayer.setup("auto");
+        //replayer.start();
+        autoBegin = System.currentTimeMillis();
     }
 
     @Override
     public void autonomousPeriodic() {
-        publishState();
+        long now = System.currentTimeMillis();
 
+        if(now - autoBegin < 4000) {
+            simpleDrive.driveBackwards(.5);
+
+        }
+
+        //publishState();
+
+        /*
         if(replayer.isReplaying()) {
             replayer.replayPeriodic();
         }
+        */
 
         /*
         conf.toggleButtonsPeriodic();
@@ -219,10 +229,23 @@ public class RobotModule extends IterativeModule implements ITableListener {
     @Override
     public void teleopPeriodic() {
         publishState();
-        if(inRecordingMode && false) {
+        if(conf.shouldShoot()) {
+            conf.getTailMotor().set(-1);
+
+        }else if(conf.shouldSlurp()) {
+            conf.getTailMotor().set(1);
+
+        }else{
+            conf.getTailMotor().set(0);
+        }
+
+        if(inRecordingMode) {
             if(recorder.isRecording()) {
+                simpleDrive.drive();
                 recorder.record();
+                networkTable.putString("recordStatus", recorder.getStatusLabel());
             }else{
+                System.out.println("Awaiting recording");
                 conf.stopMotors();
             }
         }else {
@@ -246,7 +269,6 @@ public class RobotModule extends IterativeModule implements ITableListener {
                     break;
             }
         }
-        //simpleDrive.drive(-conf.getLeftJoystick().getAxis(Joystick.AxisType.kY), conf.getRightJoystick().getAxis(Joystick.AxisType.kY));
     }
 
 
@@ -293,19 +315,32 @@ public class RobotModule extends IterativeModule implements ITableListener {
         System.out.println("received " + name + ": " + value);
         switch(name) {
             case "recordMode": {
+                System.out.println("recordMode=" + inRecordingMode + ", recording to auto");
                 inRecordingMode = (boolean) value;
+                recordingName = "auto";
+                recorder.setup(recordingName);
                 break;
             }
             case "recordName": {
-                recordingName = (String) value;
-                recorder.setup(recordingName);
+                try {
+                    recordingName = (String) value;
+                    System.out.println("recordName=" + recordingName);
+                    recorder.setup(recordingName);
+                }catch(Exception exception) {
+                    exception.printStackTrace();
+                }
                 break;
             }
             case "recording": {
                 boolean recording = (boolean) value;
-                if(recording) {
+                if(!recorder.isRecording() && recording) {
+                    System.out.println("recording begins!");
                     inRecordingMode = true;
-                    recorder.startRecording();
+                    try {
+                        recorder.startRecording();
+                    }catch(Exception e) {
+                       e.printStackTrace();
+                    }
                 }
                 break;
             }

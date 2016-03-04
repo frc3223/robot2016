@@ -55,6 +55,7 @@ public class RecorderContext {
      * or during a State Tick.
      */
     public void tick() {
+        System.out.println("record tick!");
         if (!started) {
             // First Run
             started = true;
@@ -63,7 +64,9 @@ public class RecorderContext {
                 file_out = new FileOutputStream(target_file);
                 file_out.write(String.join(",", value_suppliers.keySet()).getBytes());
                 file_out.write('\n');
-            } catch (IOException e) { }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         try {
@@ -72,6 +75,8 @@ public class RecorderContext {
                     .collect(Collectors.toList())
             ).getBytes());
             file_out.write('\n');
-        } catch (IOException e) { }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -3,6 +3,8 @@ package frc.team3223.drive;
 
 import frc.team3223.robot2016.RobotConfiguration;
 
+import java.util.Formatter;
+
 public class Recorder {
     RecorderContext context;
     private RobotConfiguration conf;
@@ -43,6 +45,17 @@ public class Recorder {
         if(System.currentTimeMillis() - startTime > 15000) {
             recording = false;
         }
+    }
+
+    public String getStatusLabel() {
+        Formatter f = new Formatter();
+        long currentTime = System.currentTimeMillis();
+        long diff = currentTime - startTime;
+        long seconds = diff / 1000;
+        long secondsOfMinute = seconds % 60;
+        long minutes = seconds / 60;
+        f.format("recording '%s' %d:%02d", context.getName(), minutes, secondsOfMinute);
+        return f.toString();
     }
 
     public boolean isRecording() {

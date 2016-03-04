@@ -125,4 +125,9 @@ public class SimpleDrive implements IDrive{
     public void setZeroThreshold(double zeroThreshold) {
         this.zeroThreshold = zeroThreshold;
     }
+
+    public void driveBackwards(double magnitude) {
+        // arg, left is right and right is left!
+        drive(-magnitude, -magnitude);
+    }
 }
