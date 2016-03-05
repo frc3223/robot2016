@@ -135,7 +135,7 @@ public class PolarTankDrive implements IDrive {
                 thrust, heading, gyro.getAngle(), getRotateThreshold());
 
         driveProvider.getLeftMotors().forEachRemaining(sc -> {
-            sc.setInverted(true);
+            sc.setInverted(false);
             sc.set(speed.fst);
         });
         driveProvider.getRightMotors().forEachRemaining(sc -> {

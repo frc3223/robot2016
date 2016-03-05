@@ -23,7 +23,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private int slurpButton = 3;
     private int shooterUpButton = 4;
     private int shooterDownButton = 5;
-    private int simpleDriveReverseButton = 5;
+    private int simpleDriveReverseButton = 8;
     private int simpleDriveResetButton = 8;
     private int rotateToAngleButton = 9;
     private int polarDriveButton = 10;
@@ -56,7 +56,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         initShooter();
         initButtonPublishers();
         tailLimitSwitch1 = Registrar.digitalInput(1);
-        tailMotor = Registrar.talon(9);
+        tailMotor = Registrar.victor(9);
         sensorManager = new SensorManager();
     }
 

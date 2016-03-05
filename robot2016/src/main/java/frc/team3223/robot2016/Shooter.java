@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.tables.ITableListener;
 
 public class Shooter implements ITableListener {
     public static enum State {
-        IDLE, SLURPING, LOADED, SHOOTING
+        IDLE, SLURPING, SHOOTING_INIT, SHOOTING_TAIL_OUT, SHOOTING_TAIL_IN, SLURP_INIT, SHOOTING_TAIL_IN_TO_STOP
     }
 
     private State state = State.IDLE;
@@ -64,31 +64,71 @@ public class Shooter implements ITableListener {
 
     public void teleopPeriodic() {
         long currentTime = System.currentTimeMillis();
+        long tailOscillationTime = 800;
+        long tailRetractTime = 500;
+
         switch (this.getState()) {
             case IDLE:
                 stopShooter();
+                stopTail();
+
                 if (conf.shouldSlurp()) {
+                    this.setStateAndStart(State.SLURP_INIT, currentTime);
+                }
+                if(conf.shouldShoot()) {
+                    this.setStateAndStart(State.SHOOTING_INIT, currentTime);
+                }
+                break;
+            case SLURP_INIT:
+                stopShooter();
+                tailIn();
+
+                if (currentTime - stateStartTime > tailRetractTime) {
                     this.setStateAndStart(State.SLURPING, currentTime);
                 }
                 break;
             case SLURPING:
                 slurp();
-                if (currentTime - stateStartTime > 3000) {
-                    this.setStateAndStart(State.LOADED, currentTime);
+                tailIn();
+
+                if(!conf.shouldSlurp()) {
+                    this.setStateAndStart(State.IDLE, currentTime);
                 }
                 break;
-            case LOADED:
+            case SHOOTING_INIT:
+                shoot();
+                tailIn();
+
+                if(!conf.shouldShoot()) {
+                    this.setStateAndStart(State.IDLE, currentTime);
+                }else if (currentTime - stateStartTime > tailRetractTime) {
+                    this.setStateAndStart(State.SHOOTING_TAIL_OUT, currentTime);
+                }
+                break;
+            case SHOOTING_TAIL_OUT:
+                shoot();
+                tailOut();
+
+                if(!conf.shouldShoot()) {
+                    this.setStateAndStart(State.SHOOTING_TAIL_IN_TO_STOP, currentTime);
+                } else if(currentTime - stateStartTime > tailOscillationTime) {
+                    this.setStateAndStart(State.SHOOTING_TAIL_IN, currentTime);
+                }
+                break;
+            case SHOOTING_TAIL_IN:
+                shoot();
+                tailIn();
+
+                if(!conf.shouldShoot()) {
+                    this.setStateAndStart(State.SHOOTING_TAIL_IN_TO_STOP, currentTime);
+                }else if(currentTime - stateStartTime > tailOscillationTime) {
+                    this.setStateAndStart(State.SHOOTING_TAIL_OUT, currentTime);
+                }
+                break;
+            case SHOOTING_TAIL_IN_TO_STOP:
                 stopShooter();
-                if (conf.shouldShoot()) {
-                    this.setStateAndStart(State.SHOOTING, currentTime);
-                }
-                else if(conf.shouldSlurp()){
-                    this.setStateAndStart(State.SLURPING,currentTime);
-                }
-                break;
-            case SHOOTING:
-                shoot(currentTime - stateStartTime > 250, true);
-                if (currentTime - stateStartTime > 3500) {
+                tailIn();
+                if(currentTime - stateStartTime > tailOscillationTime) {
                     this.setStateAndStart(State.IDLE, currentTime);
                 }
                 break;
@@ -152,15 +192,22 @@ public class Shooter implements ITableListener {
         return false;
     }
 
-    public void shoot(final boolean atSpeed, final boolean flickTail) {
+    public void shoot() {
         conf.getLeftShooterTalon().set(getShootSpeed());
-        conf.getRightShooterTalon().set(-getShootSpeed());
-        conf.getTailMotor().set((atSpeed && flickTail ) ? getTailOutSpeed() : 0);
+        conf.getRightShooterTalon().set(getShootSpeed());
+    }
+
+    public void tailOut() {
+        conf.getTailMotor().set(getTailOutSpeed());
+    }
+
+    public void tailIn() {
+        conf.getTailMotor().set(getTailInSpeed());
     }
 
     public void slurp() {
         conf.getLeftShooterTalon().set(getSlurpSpeed());
-        conf.getRightShooterTalon().set(-getSlurpSpeed());
+        conf.getRightShooterTalon().set(getSlurpSpeed());
         conf.getRollerTalon().set(getRollerSlurpSpeed());
     }
 
@@ -168,7 +215,10 @@ public class Shooter implements ITableListener {
         conf.getRightShooterTalon().set(0.);
         conf.getLeftShooterTalon().set(0.);
         conf.getRollerTalon().set(0.);
-        conf.getTailMotor().set(getTailInSpeed());
+    }
+
+    public void stopTail() {
+        conf.getTailMotor().set(0.);
     }
 
     public double getShootSpeed() {

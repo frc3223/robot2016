@@ -197,9 +197,15 @@ public class RobotModule extends IterativeModule implements ITableListener {
     public void autonomousPeriodic() {
         long now = System.currentTimeMillis();
 
-        if(now - autoBegin < 4000) {
-            simpleDrive.driveBackwards(.5);
-
+        if(now - autoBegin < 500) {
+            shooter.lowerShooter();
+        }else{
+            shooter.stopRaiser();
+        }
+        if(now - autoBegin < 3500) {
+            simpleDrive.driveBackwards(.75);
+        }else{
+            simpleDrive.drive(0,0);
         }
 
         //publishState();
@@ -229,15 +235,6 @@ public class RobotModule extends IterativeModule implements ITableListener {
     @Override
     public void teleopPeriodic() {
         publishState();
-        if(conf.shouldShoot()) {
-            conf.getTailMotor().set(-1);
-
-        }else if(conf.shouldSlurp()) {
-            conf.getTailMotor().set(1);
-
-        }else{
-            conf.getTailMotor().set(0);
-        }
 
         if(inRecordingMode) {
             if(recorder.isRecording()) {
@@ -262,13 +259,24 @@ public class RobotModule extends IterativeModule implements ITableListener {
                     //rotateToAngle.rotate();
                     break;
                 case PolarFCTank:
-                    //ptDrive.driveSingleFieldCentric();
+                    ptDrive.driveSingleFieldCentric();
                     break;
                 case AimAssist:
                     //aimAssist.drive();
                     break;
             }
         }
+
+        /*
+        if(conf.shouldShoot()) {
+            conf.getTailMotor().set(-1);
+        }else if(conf.shouldSlurp()) {
+            conf.getTailMotor().set(1);
+
+        }else{
+            conf.getTailMotor().set(0);
+        }
+        */
     }
 
 
