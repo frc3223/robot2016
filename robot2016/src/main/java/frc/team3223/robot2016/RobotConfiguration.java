@@ -42,7 +42,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private Talon rightWindowMotorTalon;
     private DigitalInput shooterDownLimitSwitch;
 
-    private DigitalInput tailLimitSwitch1;
+    private DigitalInput tailRetractedLimit;
+    private DigitalInput tailExtendedLimit;
     private SpeedController tailMotor;
     private SensorManager sensorManager;
 
@@ -55,7 +56,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         initJoysticks();
         initShooter();
         initButtonPublishers();
-        tailLimitSwitch1 = Registrar.digitalInput(1);
+        tailRetractedLimit = Registrar.digitalInput(1);
+        tailExtendedLimit = Registrar.digitalInput(2);
         tailMotor = Registrar.victor(9);
         sensorManager = new SensorManager();
     }
@@ -250,7 +252,14 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     public DigitalInput getShooterDownLimitSwitch() {
         return shooterDownLimitSwitch;
     }
-    public DigitalInput getTailLimitSwitch1() {return tailLimitSwitch1;}
+
+    public boolean isTailExtended() {
+        return tailExtendedLimit.get();
+    }
+
+    public boolean isTailRetracted() {
+        return tailRetractedLimit.get();
+    }
 
     public SpeedController getTailMotor() {return tailMotor;}
 

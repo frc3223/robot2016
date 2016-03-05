@@ -18,6 +18,12 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'GradleRIO'                                 //Apply the GradleRIO plugin
 
+allprojects {
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = '1.8'
+            targetCompatibility = '1.8'
+    } 
+}
 repositories {
   mavenLocal()
   maven {

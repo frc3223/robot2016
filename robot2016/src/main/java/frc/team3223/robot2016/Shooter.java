@@ -63,6 +63,7 @@ public class Shooter implements ITableListener {
     }
 
     public void teleopPeriodic() {
+        publishValues();
         long currentTime = System.currentTimeMillis();
         long tailOscillationTime = 800;
         long tailRetractTime = 500;
@@ -84,6 +85,7 @@ public class Shooter implements ITableListener {
                 tailIn();
 
                 if (currentTime - stateStartTime > tailRetractTime) {
+                //if (conf.isTailRetracted()) {
                     this.setStateAndStart(State.SLURPING, currentTime);
                 }
                 break;
@@ -102,6 +104,7 @@ public class Shooter implements ITableListener {
                 if(!conf.shouldShoot()) {
                     this.setStateAndStart(State.IDLE, currentTime);
                 }else if (currentTime - stateStartTime > tailRetractTime) {
+                //}else if (conf.isTailRetracted()) {
                     this.setStateAndStart(State.SHOOTING_TAIL_OUT, currentTime);
                 }
                 break;
@@ -112,6 +115,7 @@ public class Shooter implements ITableListener {
                 if(!conf.shouldShoot()) {
                     this.setStateAndStart(State.SHOOTING_TAIL_IN_TO_STOP, currentTime);
                 } else if(currentTime - stateStartTime > tailOscillationTime) {
+                //} else if(conf.isTailExtended()) {
                     this.setStateAndStart(State.SHOOTING_TAIL_IN, currentTime);
                 }
                 break;
@@ -122,12 +126,14 @@ public class Shooter implements ITableListener {
                 if(!conf.shouldShoot()) {
                     this.setStateAndStart(State.SHOOTING_TAIL_IN_TO_STOP, currentTime);
                 }else if(currentTime - stateStartTime > tailOscillationTime) {
+                //}else if (conf.isTailRetracted()) {
                     this.setStateAndStart(State.SHOOTING_TAIL_OUT, currentTime);
                 }
                 break;
             case SHOOTING_TAIL_IN_TO_STOP:
                 stopShooter();
                 tailIn();
+                //if (conf.isTailRetracted()) {
                 if(currentTime - stateStartTime > tailOscillationTime) {
                     this.setStateAndStart(State.IDLE, currentTime);
                 }
@@ -144,52 +150,9 @@ public class Shooter implements ITableListener {
         } else if (conf.shouldAimDown()) {
             lowerShooter();
             noDesiredPitch();
-            /*
-        } else if (hasDesiredPitch) {
-            if (pitchState == 0) {
-                // 0: init - arm needs to go down to zero out shooter gyro
-                lowerShooter();
-
-                if (conf.getShooterDownLimitSwitch().get()) {
-                    pitchState = 1;
-                }
-            } else if (pitchState == 1) {
-                // 1: at bottom - reset shooter gyro and turn off window motors
-                conf.getShooterGyro().reset();
-                stopRaiser();
-
-                if (desiredPitch > conf.getShooterPitch()) {
-                    pitchState = 2;
-                }
-            } else if (pitchState == 2) {
-                // 2: going up! hope desired pitch isn't past
-                raiseShooter();
-
-                if (desiredPitch - conf.getShooterPitch() < angleThreshold) {
-                    pitchState = 3;
-                }
-            } else if (conf.getShooterPitch() - desiredPitch > 3) {
-                lowerShooter();
-            } else if (desiredPitch - conf.getShooterPitch() > 3) {
-                raiseShooter();
-            } else {
-                stopRaiser();
-            }
-            */
         } else {
             stopRaiser();
         }
-
-        /*
-        if (conf.getShooterDownLimitSwitch().get()) {
-            conf.getShooterGyro().reset();
-        }
-        publishShooterPosition();
-        */
-    }
-
-    public boolean shouldMoveShooter() {
-        return false;
     }
 
     public void shoot() {
@@ -198,11 +161,19 @@ public class Shooter implements ITableListener {
     }
 
     public void tailOut() {
-        conf.getTailMotor().set(getTailOutSpeed());
+        if(conf.isTailExtended()) {
+            stopTail();
+        }else {
+            conf.getTailMotor().set(getTailOutSpeed());
+        }
     }
 
     public void tailIn() {
-        conf.getTailMotor().set(getTailInSpeed());
+        if(conf.isTailRetracted()) {
+            stopTail();
+        }else{
+            conf.getTailMotor().set(getTailInSpeed());
+        }
     }
 
     public void slurp() {
@@ -324,6 +295,8 @@ public class Shooter implements ITableListener {
         networkTable.putNumber("arm_pitch_down_speed", getArmPitchDownSpeed());
         networkTable.putNumber("arm_roller_out_speed", getArmRollerOutSpeed());
         networkTable.putNumber("arm_roller_in_speed", getArmRollerInSpeed());
+        networkTable.putBoolean("tailExtendedLimit", conf.isTailExtended());
+        networkTable.putBoolean("tailRetractedLimit", conf.isTailRetracted());
     }
 
     public void publishShooterPosition() {
