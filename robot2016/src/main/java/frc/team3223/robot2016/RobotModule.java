@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
+import frc.team3223.autonomous.DriveForward;
 import frc.team3223.autonomous.DriveToHighGoal;
 import frc.team3223.autonomous.IAutonomous;
 import frc.team3223.drive.*;
@@ -32,6 +33,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     Map<DriveMode, IDrive> driveModes;
     Map<AutonomousMode, IAutonomous> autonomousModes;
     DriveToHighGoal driveToHighGoal;
+    DriveForward driveForward;
     AutonomousMode currentAutonomousMode;
     SillyAimAssist aimAssist;
     RobotConfiguration conf;
@@ -46,7 +48,8 @@ public class RobotModule extends IterativeModule implements ITableListener {
     boolean shouldRotate = false;
 
     double desiredHeading = 0.00;
-    private int autoBegin = 0;
+
+    long clock;
 
     @Override
     public String getModuleName() {
@@ -176,37 +179,70 @@ public class RobotModule extends IterativeModule implements ITableListener {
         return !ToastBootstrap.isSimulation;
     }
 
+    long autoBegin;
     @Override
     public void autonomousInit() {
         shooter.publishValues();
         conf.publishJoystickConfiguration();
-
+        this.clock = System.currentTimeMillis();
         // tell raspi to begin logging sensor data
         networkTable.putNumber("autonomousBegin", autoBegin++);
+
+        //replayer.setup("auto");
+        //replayer.start();
+        autoBegin = System.currentTimeMillis();
     }
 
     @Override
     public void autonomousPeriodic() {
-        publishState();
+        long now = System.currentTimeMillis();
 
+        if(now - autoBegin < 500) {
+            shooter.lowerShooter();
+        }else{
+            shooter.stopRaiser();
+        }
+        if(now - autoBegin < 3500) {
+            simpleDrive.driveBackwards(.75);
+        }else{
+            simpleDrive.drive(0,0);
+        }
+
+        //publishState();
+
+        /*
+        if(replayer.isReplaying()) {
+            replayer.replayPeriodic();
+        }
+        */
+
+        /*
         conf.toggleButtonsPeriodic();
         if (currentAutonomousMode == AutonomousMode.DriveToHighGoal) {
             this.driveToHighGoal.autonomousPeriodic();
+        } else if (currentAutonomousMode == AutonomousMode.DriveForward) {
+            this.driveForward.autonomousPeriodic();
         }
+        */
     }
 
     @Override public void teleopInit() {
         conf.publishJoystickConfiguration();
         pushDriveMode(DriveMode.SimpleTank);
+        simpleDrive.drive(0,0);
     }
 
     @Override
     public void teleopPeriodic() {
-        /*publishState();
+        publishState();
+
         if(inRecordingMode) {
             if(recorder.isRecording()) {
+                simpleDrive.drive();
                 recorder.record();
+                networkTable.putString("recordStatus", recorder.getStatusLabel());
             }else{
+                System.out.println("Awaiting recording");
                 conf.stopMotors();
             }
         }else {
@@ -223,15 +259,27 @@ public class RobotModule extends IterativeModule implements ITableListener {
                     //rotateToAngle.rotate();
                     break;
                 case PolarFCTank:
-                    //ptDrive.driveSingleFieldCentric();
+                    ptDrive.driveSingleFieldCentric();
                     break;
                 case AimAssist:
                     //aimAssist.drive();
                     break;
             }
-        }*/
-        simpleDrive.drive(-conf.getLeftJoystick().getAxis(Joystick.AxisType.kY), conf.getRightJoystick().getAxis(Joystick.AxisType.kY));
+        }
+
+        /*
+        if(conf.shouldShoot()) {
+            conf.getTailMotor().set(-1);
+        }else if(conf.shouldSlurp()) {
+            conf.getTailMotor().set(1);
+
+        }else{
+            conf.getTailMotor().set(0);
+        }
+        */
     }
+
+
 
     @Override
     public void testPeriodic() {
@@ -275,19 +323,32 @@ public class RobotModule extends IterativeModule implements ITableListener {
         System.out.println("received " + name + ": " + value);
         switch(name) {
             case "recordMode": {
+                System.out.println("recordMode=" + inRecordingMode + ", recording to auto");
                 inRecordingMode = (boolean) value;
+                recordingName = "auto";
+                recorder.setup(recordingName);
                 break;
             }
             case "recordName": {
-                recordingName = (String) value;
-                recorder.setup(recordingName);
+                try {
+                    recordingName = (String) value;
+                    System.out.println("recordName=" + recordingName);
+                    recorder.setup(recordingName);
+                }catch(Exception exception) {
+                    exception.printStackTrace();
+                }
                 break;
             }
             case "recording": {
                 boolean recording = (boolean) value;
-                if(recording) {
+                if(!recorder.isRecording() && recording) {
+                    System.out.println("recording begins!");
                     inRecordingMode = true;
-                    recorder.startRecording();
+                    try {
+                        recorder.startRecording();
+                    }catch(Exception e) {
+                       e.printStackTrace();
+                    }
                 }
                 break;
             }

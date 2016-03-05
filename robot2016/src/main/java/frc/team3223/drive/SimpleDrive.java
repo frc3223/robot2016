@@ -53,6 +53,7 @@ public class SimpleDrive implements IDrive{
         setMaxSpeedModifier(0.85);
         setEqualizeThreshold(0.5);
         setZeroThreshold(0.2);
+        normalJoystickOrientation = true;
         disable();
     }
 
@@ -79,12 +80,14 @@ public class SimpleDrive implements IDrive{
         {
             leftValue = rightValue;
         }
-        if(!normalJoystickOrientation){
+        if(normalJoystickOrientation){
             leftValue=-leftValue;
             rightValue=-rightValue;
+            drive(leftValue, rightValue);
+        }else{
+            drive(rightValue, leftValue);
         }
 
-        drive(leftValue, -rightValue);
     }
 
     public void drive(double leftValue, double rightValue) {
@@ -121,5 +124,10 @@ public class SimpleDrive implements IDrive{
 
     public void setZeroThreshold(double zeroThreshold) {
         this.zeroThreshold = zeroThreshold;
+    }
+
+    public void driveBackwards(double magnitude) {
+        // arg, left is right and right is left!
+        drive(-magnitude, -magnitude);
     }
 }

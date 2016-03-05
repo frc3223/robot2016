@@ -5,7 +5,26 @@ import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
 
 public class Shooter implements ITableListener {
-    public double slurpSpeed = .78;
+    public static enum State {
+        IDLE, SLURPING, SHOOTING_INIT, SHOOTING_TAIL_OUT, SHOOTING_TAIL_IN, SLURP_INIT, SHOOTING_TAIL_IN_TO_STOP
+    }
+
+    private State state = State.IDLE;
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public void setStateAndStart(State state, long currentTime) {
+        setState(state);
+        this.stateStartTime = currentTime;
+    }
+
+    public double slurpSpeed = .4;
     public double slurpDirection = 1;
     public double shootSpeed = 1;
     public double shootDirection = -1;
@@ -21,7 +40,7 @@ public class Shooter implements ITableListener {
     double arm_roller_in_dir = 1;
 
     double tail_speed = 1;
-    double tail_out_dir = 1;
+    double tail_out_dir = -1;
     private RobotConfiguration conf;
     private NetworkTable networkTable;
 
@@ -35,7 +54,7 @@ public class Shooter implements ITableListener {
     double position1 = 10;
     double position2 = 30;
 
-    int tailState=0;
+    private long stateStartTime;
 
     public Shooter(RobotConfiguration conf, NetworkTable networkTable) {
 
@@ -44,33 +63,97 @@ public class Shooter implements ITableListener {
     }
 
     public void teleopPeriodic() {
-        if (conf.shouldShoot()) {
-            shoot();
-        } else if (conf.shouldSlurp()) {
-            slurp();
-        } else {
-            stopShooter();
+        long currentTime = System.currentTimeMillis();
+        long tailOscillationTime = 800;
+        long tailRetractTime = 500;
+
+        switch (this.getState()) {
+            case IDLE:
+                stopShooter();
+                stopTail();
+
+                if (conf.shouldSlurp()) {
+                    this.setStateAndStart(State.SLURP_INIT, currentTime);
+                }
+                if(conf.shouldShoot()) {
+                    this.setStateAndStart(State.SHOOTING_INIT, currentTime);
+                }
+                break;
+            case SLURP_INIT:
+                stopShooter();
+                tailIn();
+
+                if (currentTime - stateStartTime > tailRetractTime) {
+                    this.setStateAndStart(State.SLURPING, currentTime);
+                }
+                break;
+            case SLURPING:
+                slurp();
+                tailIn();
+
+                if(!conf.shouldSlurp()) {
+                    this.setStateAndStart(State.IDLE, currentTime);
+                }
+                break;
+            case SHOOTING_INIT:
+                shoot();
+                tailIn();
+
+                if(!conf.shouldShoot()) {
+                    this.setStateAndStart(State.IDLE, currentTime);
+                }else if (currentTime - stateStartTime > tailRetractTime) {
+                    this.setStateAndStart(State.SHOOTING_TAIL_OUT, currentTime);
+                }
+                break;
+            case SHOOTING_TAIL_OUT:
+                shoot();
+                tailOut();
+
+                if(!conf.shouldShoot()) {
+                    this.setStateAndStart(State.SHOOTING_TAIL_IN_TO_STOP, currentTime);
+                } else if(currentTime - stateStartTime > tailOscillationTime) {
+                    this.setStateAndStart(State.SHOOTING_TAIL_IN, currentTime);
+                }
+                break;
+            case SHOOTING_TAIL_IN:
+                shoot();
+                tailIn();
+
+                if(!conf.shouldShoot()) {
+                    this.setStateAndStart(State.SHOOTING_TAIL_IN_TO_STOP, currentTime);
+                }else if(currentTime - stateStartTime > tailOscillationTime) {
+                    this.setStateAndStart(State.SHOOTING_TAIL_OUT, currentTime);
+                }
+                break;
+            case SHOOTING_TAIL_IN_TO_STOP:
+                stopShooter();
+                tailIn();
+                if(currentTime - stateStartTime > tailOscillationTime) {
+                    this.setStateAndStart(State.IDLE, currentTime);
+                }
+                break;
         }
 
         double angleThreshold = 3.0;
         // convention: getShooterPitch returns zero when arm is level, positive value
         // as arm goes up.
 
-        if (conf.shouldAimUp()){
-			raiseShooter();
+        if (conf.shouldAimUp()) {
+            raiseShooter();
             noDesiredPitch();
-		} else if (conf.shouldAimDown()){
-			lowerShooter();
+        } else if (conf.shouldAimDown()) {
+            lowerShooter();
             noDesiredPitch();
-        } else if(hasDesiredPitch) {
-            if(pitchState == 0) {
+            /*
+        } else if (hasDesiredPitch) {
+            if (pitchState == 0) {
                 // 0: init - arm needs to go down to zero out shooter gyro
                 lowerShooter();
 
                 if (conf.getShooterDownLimitSwitch().get()) {
                     pitchState = 1;
                 }
-            }else if(pitchState == 1) {
+            } else if (pitchState == 1) {
                 // 1: at bottom - reset shooter gyro and turn off window motors
                 conf.getShooterGyro().reset();
                 stopRaiser();
@@ -78,60 +161,53 @@ public class Shooter implements ITableListener {
                 if (desiredPitch > conf.getShooterPitch()) {
                     pitchState = 2;
                 }
-            }else if(pitchState == 2) {
+            } else if (pitchState == 2) {
                 // 2: going up! hope desired pitch isn't past
                 raiseShooter();
 
-                if(desiredPitch - conf.getShooterPitch() < angleThreshold ) {
+                if (desiredPitch - conf.getShooterPitch() < angleThreshold) {
                     pitchState = 3;
                 }
-            }else if(conf.getShooterPitch() - desiredPitch > 3){
+            } else if (conf.getShooterPitch() - desiredPitch > 3) {
                 lowerShooter();
-            }else if(desiredPitch - conf.getShooterPitch() > 3) {
+            } else if (desiredPitch - conf.getShooterPitch() > 3) {
                 raiseShooter();
-            }else {
+            } else {
                 stopRaiser();
             }
-        }else{
+            */
+        } else {
             stopRaiser();
         }
 
-        if(conf.getShooterDownLimitSwitch().get()) {
+        /*
+        if (conf.getShooterDownLimitSwitch().get()) {
             conf.getShooterGyro().reset();
         }
-        tailPeriodic();
         publishShooterPosition();
+        */
     }
 
-	public boolean shouldMoveShooter(){
+    public boolean shouldMoveShooter() {
         return false;
-	}
+    }
 
     public void shoot() {
         conf.getLeftShooterTalon().set(getShootSpeed());
-        conf.getRightShooterTalon().set(-getShootSpeed());
+        conf.getRightShooterTalon().set(getShootSpeed());
     }
 
-    public void tailPeriodic(){
-        if (tailState==0) {
-            conf.getTailSpark().set(getTailInSpeed());
+    public void tailOut() {
+        conf.getTailMotor().set(getTailOutSpeed());
+    }
 
-            if (conf.shouldShoot()){
-                tailState=1;
-            }
-
-        }
-        else if (tailState==1){
-            conf.getTailSpark().set(getTailOutSpeed());
-            if (conf.getTailLimitSwitch1().get()){
-                tailState=0;
-            }
-        }
+    public void tailIn() {
+        conf.getTailMotor().set(getTailInSpeed());
     }
 
     public void slurp() {
         conf.getLeftShooterTalon().set(getSlurpSpeed());
-        conf.getRightShooterTalon().set(-getSlurpSpeed());
+        conf.getRightShooterTalon().set(getSlurpSpeed());
         conf.getRollerTalon().set(getRollerSlurpSpeed());
     }
 
@@ -139,6 +215,10 @@ public class Shooter implements ITableListener {
         conf.getRightShooterTalon().set(0.);
         conf.getLeftShooterTalon().set(0.);
         conf.getRollerTalon().set(0.);
+    }
+
+    public void stopTail() {
+        conf.getTailMotor().set(0.);
     }
 
     public double getShootSpeed() {
@@ -181,7 +261,7 @@ public class Shooter implements ITableListener {
     @Override
     public void valueChanged(ITable table,
                              String name, Object value, boolean isNew) {
-        switch(name) {
+        switch (name) {
             case "slurpSpeed": {
                 double dvalue = (double) value;
                 slurpSpeed = Math.min(Math.abs(dvalue), 1.0);
@@ -218,19 +298,19 @@ public class Shooter implements ITableListener {
                 break;
             }
             case "shooterPosition": {
-                if(value.equals("bottom")){
+                if (value.equals("bottom")) {
                     hasDesiredPitch = true;
                     desiredPitch = bottomPosition;
                     desiredPitchName = (String) value;
-                }else if(value.equals("pos1")) {
+                } else if (value.equals("pos1")) {
                     hasDesiredPitch = true;
                     desiredPitch = position1;
                     desiredPitchName = (String) value;
-                }else if(value.equals("pos2")) {
+                } else if (value.equals("pos2")) {
                     hasDesiredPitch = true;
                     desiredPitch = position2;
                     desiredPitchName = (String) value;
-                }else{
+                } else {
                     noDesiredPitch();
                 }
 
@@ -249,7 +329,7 @@ public class Shooter implements ITableListener {
     public void publishShooterPosition() {
         pitchPublishIncrement++;
         // publish once every half second or so
-        if(pitchPublishIncrement % 30 == 1) {
+        if (pitchPublishIncrement % 30 == 1) {
             networkTable.putString("shooterArmPitch", desiredPitchName);
             pitchPublishIncrement = 0;
         }
@@ -274,8 +354,11 @@ public class Shooter implements ITableListener {
     }
 
     public void stopRaiser() {
-        System.out.println("Stopping raise");
+//        System.out.println("Stopping raise");
         conf.getRightWindowMotorTalon().set(0.);
         conf.getLeftWindowMotorTalon().set(0.);
+//        System.out.println("Stopped raise");
     }
+
+
 }

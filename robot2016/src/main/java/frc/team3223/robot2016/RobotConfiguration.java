@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import frc.team3223.drive.ISpeedControllerProvider;
 import frc.team3223.navx.INavX;
-import frc.team3223.navx.NavXRegistrar;
 import frc.team3223.util.ToggleButton;
 import jaci.openrio.toast.lib.registry.Registrar;
 
@@ -24,7 +23,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private int slurpButton = 3;
     private int shooterUpButton = 4;
     private int shooterDownButton = 5;
-    private int simpleDriveReverseButton = 5;
+    private int simpleDriveReverseButton = 8;
     private int simpleDriveResetButton = 8;
     private int rotateToAngleButton = 9;
     private int polarDriveButton = 10;
@@ -43,8 +42,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private Talon rightWindowMotorTalon;
     private DigitalInput shooterDownLimitSwitch;
 
-    private DigitalInput TailLimitSwitch1;
-    private Spark TailSpark;
+    private DigitalInput tailLimitSwitch1;
+    private SpeedController tailMotor;
     private SensorManager sensorManager;
 
 
@@ -56,8 +55,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         initJoysticks();
         initShooter();
         initButtonPublishers();
-        TailLimitSwitch1=Registrar.digitalInput(1);
-        TailSpark=Registrar.spark(9);
+        tailLimitSwitch1 = Registrar.digitalInput(1);
+        tailMotor = Registrar.victor(9);
         sensorManager = new SensorManager();
     }
 
@@ -93,8 +92,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         /* assigning joystick buttons to names to be displayed in the dashboard
          * left = leftJoystick : right = rightJoystick
          */
-        networkTable.putString("left_" + shootButton, "fire");
-        networkTable.putString("right_" + slurpButton, "get ball");
+        networkTable.putString("right_" + shootButton, "fire");
+        networkTable.putString("left_" + slurpButton, "get ball");
         networkTable.putString("right_" + simpleDriveReverseButton, "reverse tank drive");
         networkTable.putString("left_" + shooterUpButton, "aim up");
         networkTable.putString("left_" + shooterDownButton, "aim down");
@@ -106,11 +105,11 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
 
     public boolean shouldShoot() {
-        return leftJoystick.getRawButton(shootButton);
+        return rightJoystick.getRawButton(shootButton);
     }
 
     public boolean shouldSlurp() {
-        return rightJoystick.getRawButton(slurpButton);
+        return leftJoystick.getRawButton(slurpButton);
     }
 
     public boolean shouldAimUp(){
@@ -172,22 +171,22 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
     @Override
     public Talon getFrontLeftTalon() {
-        return talons.get(0);
-    }
-
-    @Override
-    public Talon getRearLeftTalon() {
-        return talons.get(1);
-    }
-
-    @Override
-    public Talon getFrontRightTalon() {
         return talons.get(2);
     }
 
     @Override
-    public Talon getRearRightTalon() {
+    public Talon getRearLeftTalon() {
         return talons.get(3);
+    }
+
+    @Override
+    public Talon getFrontRightTalon() {
+        return talons.get(0);
+    }
+
+    @Override
+    public Talon getRearRightTalon() {
+        return talons.get(1);
     }
 
     public Talon getLeftShooterTalon() {
@@ -222,9 +221,6 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         return new ToggleButton(leftJoystick, aimAssistButton);
     }
 
-    public boolean shouldAimAssist() {
-        return leftJoystick.getRawButton(aimAssistButton);
-    }
 
     public ToggleButton makePolarDriveToggle() {
         return new ToggleButton(getLeftJoystick(), polarDriveButton);
@@ -254,9 +250,9 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     public DigitalInput getShooterDownLimitSwitch() {
         return shooterDownLimitSwitch;
     }
-    public DigitalInput getTailLimitSwitch1() {return TailLimitSwitch1;}
+    public DigitalInput getTailLimitSwitch1() {return tailLimitSwitch1;}
 
-    public Spark getTailSpark() {return TailSpark;}
+    public SpeedController getTailMotor() {return tailMotor;}
 
     public void stopMotors() {
         getFrontLeftTalon().set(0);
