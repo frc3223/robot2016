@@ -146,8 +146,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     }
 
     public void initShooter(){
-        this.leftShooterTalon = Registrar.talon(leftShooterChannel);
-        this.rightShooterTalon = Registrar.talon(rightShooterChannel);
+        //this.leftShooterTalon = Registrar.talon(leftShooterChannel);
+        //this.rightShooterTalon = Registrar.talon(rightShooterChannel);
         this.rollerTalon = Registrar.talon(rollerChannel);
         this.leftWindowMotorTalon = Registrar.talon(leftWindowMotorChannel);
         this.rightWindowMotorTalon = Registrar.talon(rightWindowMotorChannel);

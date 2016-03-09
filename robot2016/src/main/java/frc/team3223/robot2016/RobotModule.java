@@ -195,6 +195,10 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     @Override
     public void autonomousPeriodic() {
+        driveBackwardsAuto();
+    }
+
+    public void driveBackwardsAuto() {
         long now = System.currentTimeMillis();
 
         if(now - autoBegin < 500) {
@@ -207,23 +211,21 @@ public class RobotModule extends IterativeModule implements ITableListener {
         }else{
             simpleDrive.drive(0,0);
         }
+    }
 
-        //publishState();
+    public void portcullisAuto() {
+        long now = System.currentTimeMillis();
 
-        /*
-        if(replayer.isReplaying()) {
-            replayer.replayPeriodic();
+        if(now - autoBegin < 1000) {
+            shooter.lowerShooter();
+        }else{
+            shooter.stopRaiser();
         }
-        */
-
-        /*
-        conf.toggleButtonsPeriodic();
-        if (currentAutonomousMode == AutonomousMode.DriveToHighGoal) {
-            this.driveToHighGoal.autonomousPeriodic();
-        } else if (currentAutonomousMode == AutonomousMode.DriveForward) {
-            this.driveForward.autonomousPeriodic();
+        if(now - autoBegin > 1000 && now - autoBegin < 4500) {
+            simpleDrive.driveForwards(.65);
+        }else{
+            simpleDrive.drive(0,0);
         }
-        */
     }
 
     @Override public void teleopInit() {

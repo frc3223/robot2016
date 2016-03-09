@@ -193,32 +193,32 @@ public class Shooter implements ITableListener {
     }
 
     public void shoot() {
-        conf.getLeftShooterTalon().set(getShootSpeed());
-        conf.getRightShooterTalon().set(getShootSpeed());
+        //conf.getLeftShooterTalon().set(getShootSpeed());
+        //conf.getRightShooterTalon().set(getShootSpeed());
     }
 
     public void tailOut() {
-        conf.getTailMotor().set(getTailOutSpeed());
+        //conf.getTailMotor().set(getTailOutSpeed());
     }
 
     public void tailIn() {
-        conf.getTailMotor().set(getTailInSpeed());
+        //conf.getTailMotor().set(getTailInSpeed());
     }
 
     public void slurp() {
-        conf.getLeftShooterTalon().set(getSlurpSpeed());
-        conf.getRightShooterTalon().set(getSlurpSpeed());
+        //conf.getLeftShooterTalon().set(getSlurpSpeed());
+        //conf.getRightShooterTalon().set(getSlurpSpeed());
         conf.getRollerTalon().set(getRollerSlurpSpeed());
     }
 
     public void stopShooter() {
-        conf.getRightShooterTalon().set(0.);
-        conf.getLeftShooterTalon().set(0.);
+        //conf.getRightShooterTalon().set(0.);
+        //conf.getLeftShooterTalon().set(0.);
         conf.getRollerTalon().set(0.);
     }
 
     public void stopTail() {
-        conf.getTailMotor().set(0.);
+        //conf.getTailMotor().set(0.);
     }
 
     public double getShootSpeed() {
