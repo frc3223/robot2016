@@ -40,6 +40,9 @@ public class RobotModule extends IterativeModule implements ITableListener {
     Recorder recorder;
     Replayer replayer;
 
+    boolean rotating = false;
+    double rotateAngle;
+
     boolean inRecordingMode = false;
     String recordingName = "recorded";
 
@@ -80,6 +83,29 @@ public class RobotModule extends IterativeModule implements ITableListener {
         initPolarDrive();
         initAimAssist();
         initDriveToHighGoal();
+
+        ToggleButton recordbtn = conf.makeRecordToggle();
+        recordbtn.onToggleOn((jb, n) -> {
+            if(!recorder.isRecording()) {
+                System.out.println("begin recording!");
+                recorder.setup(recordingName);
+                recorder.startRecording();
+            }
+        });
+
+        toggleButtons.add(recordbtn);
+
+        ToggleButton rotateBtn = conf.make180Toggle();
+        rotateBtn.onToggleOn((jb , n) -> {
+            if(rotating) {
+                rotating = false;
+            }else{
+                rotating = true;
+                rotateAngle = PolarTankDrive.normalizeDegrees(
+                        conf.getSensorManager().getNavX().getAngle() + 200);
+            }
+        });
+        toggleButtons.add(rotateBtn);
 
         conf.publishJoystickConfiguration();
     }
@@ -125,7 +151,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     }
 
     private void initRotateToAngle() {
-        rotateToAngle = new RotateToAngle(conf.getNavX(), simpleDrive);
+        rotateToAngle = new RotateToAngle(conf.getSensorManager().getNavX(), simpleDrive);
         networkTable.addTableListener(rotateToAngle);
         toggleButtons.add(conf.makeRotateToAngleToggle()
                 .onToggleOn((j, b) -> {
@@ -138,7 +164,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     }
 
     private void initPolarDrive() {
-        ptDrive = new PolarTankDrive(conf.getNavX(), this.conf, this.networkTable);
+        ptDrive = new PolarTankDrive(conf.getSensorManager().getNavX(), this.conf, this.networkTable);
         ptDrive.setDirectionJoystick(conf.getLeftJoystick());
         toggleButtons.add(conf.makePolarDriveToggle()
                 .onToggleOn((j, b) -> {
@@ -209,7 +235,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
         if(now - autoBegin < 3500) {
             simpleDrive.driveBackwards(.75);
         }else{
-            simpleDrive.drive(0,0);
+            simpleDrive.rotate(0.5);
         }
     }
 
@@ -228,6 +254,22 @@ public class RobotModule extends IterativeModule implements ITableListener {
         }
     }
 
+    public void lowbarAuto () {
+        long now = System.currentTimeMillis();
+        long e = now - autoBegin;
+
+        if(e < 1000) {
+            shooter.lowerShooter();
+        }else {
+            shooter.stopRaiser();
+        }
+        if(e > 1000 && e < 4500) {
+            simpleDrive.driveForwards(.65);
+        }else{
+            simpleDrive.drive(0,0);
+        }
+    }
+
     @Override public void teleopInit() {
         conf.publishJoystickConfiguration();
         pushDriveMode(DriveMode.SimpleTank);
@@ -238,22 +280,27 @@ public class RobotModule extends IterativeModule implements ITableListener {
     public void teleopPeriodic() {
         publishState();
 
-        if(inRecordingMode) {
-            if(recorder.isRecording()) {
-                simpleDrive.drive();
-                recorder.record();
-                networkTable.putString("recordStatus", recorder.getStatusLabel());
-            }else{
-                System.out.println("Awaiting recording");
-                conf.stopMotors();
+        if(recorder.isRecording()) {
+            recorder.record();
+        }
+        if(conf.shouldResetEncoder()) {
+            conf.getSensorManager().getShooterRaiserEncoder().reset();
+        }
+        networkTable.putString("recordStatus", recorder.getStatusLabel());
+
+        conf.toggleButtonsPeriodic();
+        toggleButtons.forEach(tb -> tb.periodic());
+
+        shooter.teleopPeriodic();
+
+        if(rotating) {
+            simpleDrive.rotate(.75);
+            if(Math.abs(PolarTankDrive.normalizeDegrees(conf.getSensorManager().getNavX().getAngle() - rotateAngle)) < 3) {
+                rotating = false;
             }
         }else {
-            conf.toggleButtonsPeriodic();
-            toggleButtons.forEach(tb -> tb.periodic());
 
-            shooter.teleopPeriodic();
-
-            switch(driveMode) {
+            switch (driveMode) {
                 case SimpleTank:
                     simpleDrive.drive();
                     break;
@@ -261,7 +308,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
                     //rotateToAngle.rotate();
                     break;
                 case PolarFCTank:
-                    ptDrive.driveSingleFieldCentric();
+                    //ptDrive.driveSingleFieldCentric();
                     break;
                 case AimAssist:
                     //aimAssist.drive();
@@ -298,25 +345,24 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     public void publishState() {
         if(isReal()) {
-            networkTable.putNumber("angle", conf.getNavX().getAngle());
-            networkTable.putNumber("dangle", conf.getNavX().getRate());
-            networkTable.putNumber("yaw", conf.getNavX().getYaw());
-            networkTable.putNumber("pitch", conf.getNavX().getPitch());
-            networkTable.putNumber("roll", conf.getNavX().getRoll());
-            networkTable.putNumber("accel_x", conf.getNavX().getWorldLinearAccelX());
-            networkTable.putNumber("accel_y", conf.getNavX().getWorldLinearAccelY());
-            networkTable.putNumber("accel_z", conf.getNavX().getWorldLinearAccelZ());
-            networkTable.putNumber("velocity_x", conf.getNavX().getVelocityX());
-            networkTable.putNumber("velocity_y", conf.getNavX().getVelocityY());
-            networkTable.putNumber("velocity_z", conf.getNavX().getVelocityZ());
-            networkTable.putNumber("pos_x", conf.getNavX().getDisplacementX());
-            networkTable.putNumber("pos_y", conf.getNavX().getDisplacementY());
-            networkTable.putNumber("pos_z", conf.getNavX().getDisplacementZ());
-            networkTable.putNumber("fused_heading", conf.getNavX().getFusedHeading());
+            networkTable.putNumber("angle", conf.getSensorManager().getNavX().getAngle());
+            networkTable.putNumber("dangle", conf.getSensorManager().getNavX().getRate());
+            networkTable.putNumber("yaw", conf.getSensorManager().getNavX().getYaw());
+            networkTable.putNumber("pitch", conf.getSensorManager().getNavX().getPitch());
+            networkTable.putNumber("roll", conf.getSensorManager().getNavX().getRoll());
+            networkTable.putNumber("accel_x", conf.getSensorManager().getNavX().getWorldLinearAccelX());
+            networkTable.putNumber("accel_y", conf.getSensorManager().getNavX().getWorldLinearAccelY());
+            networkTable.putNumber("accel_z", conf.getSensorManager().getNavX().getWorldLinearAccelZ());
+            networkTable.putNumber("velocity_x", conf.getSensorManager().getNavX().getVelocityX());
+            networkTable.putNumber("velocity_y", conf.getSensorManager().getNavX().getVelocityY());
+            networkTable.putNumber("velocity_z", conf.getSensorManager().getNavX().getVelocityZ());
+            networkTable.putNumber("pos_x", conf.getSensorManager().getNavX().getDisplacementX());
+            networkTable.putNumber("pos_y", conf.getSensorManager().getNavX().getDisplacementY());
+            networkTable.putNumber("pos_z", conf.getSensorManager().getNavX().getDisplacementZ());
+            networkTable.putNumber("fused_heading", conf.getSensorManager().getNavX().getFusedHeading());
             networkTable.putNumber("shooter_pitch", conf.getShooterPitch());
         }
         networkTable.putString("driveMode", driveMode.toString());
-        //networkTable.putNumber("raw_shooter_angle", conf.getShooterGyro().getAngle());
     }
 
     @Override

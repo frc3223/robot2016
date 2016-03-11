@@ -55,7 +55,6 @@ public class RecorderContext {
      * or during a State Tick.
      */
     public void tick() {
-        System.out.println("record tick!");
         if (!started) {
             // First Run
             started = true;

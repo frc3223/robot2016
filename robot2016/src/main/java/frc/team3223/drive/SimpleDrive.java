@@ -134,4 +134,8 @@ public class SimpleDrive implements IDrive{
     public void driveForwards(double magnitude) {
         drive(magnitude, magnitude);
     }
+
+    public void rotate(double magnitude) {
+        drive(magnitude, -magnitude);
+    }
 }

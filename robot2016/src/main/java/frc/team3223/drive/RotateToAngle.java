@@ -3,13 +3,17 @@ package frc.team3223.drive;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
+import frc.team3223.navx.INavX;
 
 /* thieverized from navx example rotate to angle */
 public class RotateToAngle implements ITableListener, PIDOutput, IDrive{
 
     PIDController turnController;
+    private PIDSource pidSource;
+    private Gyro gyro;
     private SimpleDrive simpleDrive;
     double rotateToAngleRate;
 
@@ -29,10 +33,19 @@ public class RotateToAngle implements ITableListener, PIDOutput, IDrive{
 
     double desiredHeading = 0.0;
 
-    public RotateToAngle(PIDSource gyro, SimpleDrive simpleDrive) {
+    public RotateToAngle(INavX navx, SimpleDrive simpleDrive) {
+        this.pidSource = navx;
+        this.gyro = navx;
         this.simpleDrive = simpleDrive;
+        makeController();
 
-        turnController = new PIDController(kP, kI, kD, kF, gyro, this);
+    }
+
+    private void makeController() {
+        if(turnController != null) {
+            turnController.disable();
+        }
+        turnController = new PIDController(kP, kI, kD, kF, pidSource, this);
         turnController.setInputRange(-180.0f, 180.0f);
         turnController.setOutputRange(-1.0, 1.0);
         turnController.setAbsoluteTolerance(kToleranceDegrees);
@@ -44,13 +57,43 @@ public class RotateToAngle implements ITableListener, PIDOutput, IDrive{
     public void valueChanged(ITable source, String key, Object value, boolean isNew) {
 
         switch(key) {
+            /*
             case "desired_heading": {
-                desiredHeading = (double) value;
-                turnController.setSetpoint(desiredHeading);
+                double dvalue = (double) value;
+                if(Math.abs(dvalue) > 180) {
+                    turnController.setSetpoint(gyro.getAngle());
+                }else{
+                    desiredHeading = dvalue;
+                    turnController.setSetpoint(desiredHeading);
+                }
+                break;
+            }
+            */
+            case "target_theta": {
+                double dvalue = (double) value;
+                if(Math.abs(dvalue) < 100) {
+                    desiredHeading = gyro.getAngle() + dvalue; // or is it minus?
+                    turnController.setSetpoint(desiredHeading);
+                }
                 break;
             }
             case "rotate_velocity": {
                 rotateToAngleRate = (double) value;
+                break;
+            }
+            case "rotate_proportional": {
+                kP = (double) value;
+                makeController();
+                break;
+            }
+            case "rotate_derivative": {
+                kD = (double) value;
+                makeController();
+                break;
+            }
+            case "rotate_integral": {
+                kI = (double) value;
+                makeController();
                 break;
             }
         }
