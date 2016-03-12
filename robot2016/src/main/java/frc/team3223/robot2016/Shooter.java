@@ -28,13 +28,13 @@ public class Shooter implements ITableListener, PIDOutput{
     }
 
     public double slurpSpeed = .4;
-    public double slurpDirection = 1;
+    public double slurpDirection = -1;
     public double shootSpeed = 1;
     public double shootDirection = -1;
 
     double arm_pitch_up_speed = 1.0;
     double arm_pitch_up_dir = 1;
-    double arm_pitch_down_speed = 0.75;
+    double arm_pitch_down_speed = 0.15;
     double arm_pitch_down_dir = -1;
 
     double arm_roller_out_speed = 1;
@@ -92,8 +92,8 @@ public class Shooter implements ITableListener, PIDOutput{
 
     public void teleopPeriodic() {
         long currentTime = System.currentTimeMillis();
-        long tailOscillationTime = 800;
-        long tailRetractTime = 500;
+        long tailOscillationTime = 0;
+        long tailRetractTime = 0;
 
         switch (this.getState()) {
             case IDLE:
@@ -180,7 +180,7 @@ public class Shooter implements ITableListener, PIDOutput{
 
     public void shoot() {
         conf.getLeftShooterTalon().set(getShootSpeed());
-        conf.getRightShooterTalon().set(getShootSpeed());
+        conf.getRightShooterTalon().set(-getShootSpeed());
     }
 
     public void tailOut() {
@@ -192,7 +192,7 @@ public class Shooter implements ITableListener, PIDOutput{
     }
 
     public void slurp() {
-        conf.getLeftShooterTalon().set(getSlurpSpeed());
+        conf.getLeftShooterTalon().set(-getSlurpSpeed());
         conf.getRightShooterTalon().set(getSlurpSpeed());
     }
 
@@ -220,6 +220,10 @@ public class Shooter implements ITableListener, PIDOutput{
 
     public double getArmPitchUpSpeed() {
         return Math.copySign(arm_pitch_up_speed, arm_pitch_up_dir);
+    }
+
+    public double getArmPitchStaySpeed() {
+        return Math.copySign(0.5, arm_pitch_up_dir);
     }
 
     public double getArmPitchDownSpeed() {
@@ -335,8 +339,8 @@ public class Shooter implements ITableListener, PIDOutput{
     }
 
     public void stopRaiser() {
-        conf.getRightRaiseShooterTalon().set(0.);
-        conf.getLeftRaiseShooterTalon().set(0.);
+        conf.getLeftRaiseShooterTalon().set(getArmPitchStaySpeed());
+        conf.getRightRaiseShooterTalon().set(-getArmPitchStaySpeed());
     }
 
     @Override
