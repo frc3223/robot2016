@@ -31,8 +31,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
     private int leftShooterChannel = 4;
     private int rightShooterChannel = 5;
-    private int leftRaiseShooterChannel = 7;
-    private int rightRaiseShooterChannel = 8;
+    private int leftRaiseShooterChannel = 8;
+    private int rightRaiseShooterChannel = 7;
     private int tailChannel = 9;
 
     private Talon leftShooterTalon;
@@ -109,6 +109,38 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
     public boolean shouldAimUp(){
         return leftJoystick.getRawButton(shooterUpButton);
+    }
+
+    public boolean testShouldAimUpLeft(){
+        return leftJoystick.getRawButton(shooterUpButton);
+    }
+
+    public boolean testShouldAimUpRight(){
+        return rightJoystick.getRawButton(shooterUpButton);
+    }
+
+    public boolean testShouldAimDownLeft(){
+        return leftJoystick.getRawButton(shooterDownButton);
+    }
+
+    public boolean testShouldAimDownRight(){
+        return rightJoystick.getRawButton(shooterDownButton);
+    }
+
+    public boolean testShouldOffBearingLeft(){
+        return leftJoystick.getRawButton(3);
+    }
+
+    public boolean testShouldOffBearingRight(){
+        return rightJoystick.getRawButton(3);
+    }
+
+    public boolean testShouldStayLeft(){
+        return leftJoystick.getRawButton(10);
+    }
+
+    public boolean testShouldStayRight(){
+        return rightJoystick.getRawButton(10);
     }
 
     public boolean shouldAimDown(){

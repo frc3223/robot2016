@@ -227,15 +227,17 @@ public class RobotModule extends IterativeModule implements ITableListener {
     public void driveBackwardsAuto() {
         long now = System.currentTimeMillis();
 
-        if(now - autoBegin < 500) {
-            shooter.lowerShooter();
+        long elapsed = now - autoBegin;
+
+        if(elapsed < 1500) {
+            shooter.offBearingShooter();
         }else{
             shooter.stopRaiser();
         }
-        if(now - autoBegin < 3500) {
+        if(500 < elapsed && elapsed < 3500) {
             simpleDrive.driveBackwards(.75);
         }else{
-            simpleDrive.rotate(0.5);
+            simpleDrive.drive(0,0);
         }
     }
 
@@ -334,6 +336,35 @@ public class RobotModule extends IterativeModule implements ITableListener {
     public void testPeriodic() {
         conf.toggleButtonsPeriodic();
         publishState();
+
+        if(conf.testShouldAimUpLeft()) {
+            shooter.raiseShooterLeft();
+        }
+        else if(conf.testShouldAimDownLeft()) {
+            shooter.lowerShooterLeft();
+        }
+        else if(conf.testShouldOffBearingLeft()) {
+            shooter.offBearingShooterLeft();
+        }
+        else if(conf.testShouldStayLeft()) {
+            shooter.stopRaiserLeft();
+        }else {
+            conf.getLeftRaiseShooterTalon().set(0);
+        }
+        if(conf.testShouldAimUpRight()) {
+            shooter.raiseShooterRight();
+        }
+        else if(conf.testShouldAimDownRight()) {
+            shooter.lowerShooterRight();
+        }
+        else if(conf.testShouldOffBearingRight()) {
+            shooter.offBearingShooterRight();
+        }
+        else if(conf.testShouldStayRight()) {
+            shooter.stopRaiserRight();
+        }else{
+            conf.getRightRaiseShooterTalon().set(0);
+        }
     }
 
     @Override

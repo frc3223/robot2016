@@ -31,11 +31,14 @@ public class Shooter implements ITableListener, PIDOutput{
     public double slurpDirection = -1;
     public double shootSpeed = 1;
     public double shootDirection = -1;
+    public double arm_stay_speed = 0.75;
 
     double arm_pitch_up_speed = 1.0;
-    double arm_pitch_up_dir = 1;
-    double arm_pitch_down_speed = 0.15;
+    double arm_pitch_up_dir = -1;
+    double arm_pitch_down_speed = 0.65;
     double arm_pitch_down_dir = -1;
+    double arm_pitch_off_speed = 0.85;
+    double arm_pitch_off_dir = -1;
 
     double arm_roller_out_speed = 1;
     double arm_roller_out_dir = -1;
@@ -223,11 +226,15 @@ public class Shooter implements ITableListener, PIDOutput{
     }
 
     public double getArmPitchStaySpeed() {
-        return Math.copySign(0.5, arm_pitch_up_dir);
+        return Math.copySign(arm_stay_speed, arm_pitch_up_dir);
     }
 
     public double getArmPitchDownSpeed() {
         return Math.copySign(arm_pitch_down_speed, arm_pitch_down_dir);
+    }
+
+    public double getArmPitchOffSpeed() {
+        return Math.copySign(arm_pitch_off_speed, arm_pitch_off_dir);
     }
 
     public double getArmRollerOutSpeed() {
@@ -325,22 +332,57 @@ public class Shooter implements ITableListener, PIDOutput{
         networkTable.putNumber("arm_roller_out_speed", getArmRollerOutSpeed());
         networkTable.putNumber("arm_roller_in_speed", getArmRollerInSpeed());
     }
+    public void raiseShooterLeft() {
+        conf.getLeftRaiseShooterTalon().set(getArmPitchUpSpeed());
+    }
+
+    public void raiseShooterRight() {
+        conf.getRightRaiseShooterTalon().set(getArmPitchUpSpeed());
+    }
 
     public void raiseShooter() {
-        System.out.println("raise shooter");
-        conf.getLeftRaiseShooterTalon().set(getArmPitchUpSpeed());
-        conf.getRightRaiseShooterTalon().set(-getArmPitchUpSpeed());
+        raiseShooterLeft();
+        raiseShooterRight();
+    }
+
+    public void lowerShooterLeft() {
+        conf.getLeftRaiseShooterTalon().set(getArmPitchDownSpeed());
+
+    }
+
+    public void lowerShooterRight() {
+        conf.getRightRaiseShooterTalon().set(getArmPitchDownSpeed());
     }
 
     public void lowerShooter() {
-        System.out.println("lower shooter");
-        conf.getLeftRaiseShooterTalon().set(getArmPitchDownSpeed());
-        conf.getRightRaiseShooterTalon().set(-getArmPitchDownSpeed());
+        lowerShooterLeft();
+        lowerShooterRight();
+    }
+
+    public void offBearingShooterLeft() {
+        conf.getLeftRaiseShooterTalon().set(-getArmPitchOffSpeed());
+    }
+
+    public void offBearingShooterRight() {
+        conf.getRightRaiseShooterTalon().set(getArmPitchOffSpeed());
+    }
+
+    public void offBearingShooter() {
+        offBearingShooterLeft();
+        offBearingShooterRight();
+    }
+
+    public void stopRaiserRight() {
+        conf.getRightRaiseShooterTalon().set(getArmPitchStaySpeed());
+    }
+
+    public void stopRaiserLeft() {
+        conf.getLeftRaiseShooterTalon().set(getArmPitchStaySpeed());
     }
 
     public void stopRaiser() {
-        conf.getLeftRaiseShooterTalon().set(getArmPitchStaySpeed());
-        conf.getRightRaiseShooterTalon().set(-getArmPitchStaySpeed());
+        stopRaiserLeft();
+        stopRaiserRight();
     }
 
     @Override
