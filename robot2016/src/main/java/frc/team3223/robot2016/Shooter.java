@@ -27,18 +27,18 @@ public class Shooter implements ITableListener, PIDOutput{
         this.stateStartTime = currentTime;
     }
 
-    public double slurpSpeed = .4;
+    public double slurpSpeed = .6;
     public double slurpDirection = -1;
     public double shootSpeed = 1;
     public double shootDirection = -1;
     public double arm_stay_speed = 0.75;
 
     double arm_pitch_up_speed = 1.0;
-    double arm_pitch_up_dir = -1;
-    double arm_pitch_down_speed = 0.65;
-    double arm_pitch_down_dir = -1;
-    double arm_pitch_off_speed = 0.85;
-    double arm_pitch_off_dir = -1;
+    double arm_pitch_up_dir = 1;
+    double arm_pitch_down_speed = 0.45;
+    double arm_pitch_down_dir = 1;
+    double arm_pitch_off_speed = 0.55;
+    double arm_pitch_off_dir = 1;
 
     double arm_roller_out_speed = 1;
     double arm_roller_out_dir = -1;
@@ -65,8 +65,10 @@ public class Shooter implements ITableListener, PIDOutput{
     double raiseSetpoint = 0;
 
     double bottomPosition = -183;
-    double breachPosition = 50;
+    double breachPosition = -150;
     double topPosition = 0;
+
+    double raiseLimit = -50;
 
     public Shooter(RobotConfiguration conf, NetworkTable networkTable) {
 
@@ -165,25 +167,24 @@ public class Shooter implements ITableListener, PIDOutput{
                 break;
         }
 
-        double angleThreshold = 3.0;
-        // convention: getShooterPitch returns zero when arm is level, positive value
-        // as arm goes up.
-
         if (conf.shouldAimUp()) {
-            //raiseSetpoint -= 2;
-            // if (raiseSetpoint < -
             raiseShooter();
         } else if (conf.shouldAimDown()) {
-            //raiseSetpoint += 2;
             lowerShooter();
         } else {
             stopRaiser();
         }
     }
 
-    public void shoot() {
+    public void shootLeft() {
         conf.getLeftShooterTalon().set(getShootSpeed());
+    }
+    public void shootRight() {
         conf.getRightShooterTalon().set(-getShootSpeed());
+    }
+    public void shoot() {
+        shootLeft();
+        shootRight();
     }
 
     public void tailOut() {
@@ -194,9 +195,17 @@ public class Shooter implements ITableListener, PIDOutput{
         conf.getTailMotor().set(getTailInSpeed());
     }
 
-    public void slurp() {
+    public void slurpLeft() {
         conf.getLeftShooterTalon().set(-getSlurpSpeed());
+    }
+
+    public void slurpRight() {
         conf.getRightShooterTalon().set(getSlurpSpeed());
+    }
+
+    public void slurp() {
+        slurpLeft();
+        slurpRight();
     }
 
     public void stopShooter() {
@@ -215,10 +224,6 @@ public class Shooter implements ITableListener, PIDOutput{
     public double getSlurpSpeed() {
         return Math.copySign(slurpSpeed, slurpDirection);
 
-    }
-
-    public double getRollerSlurpSpeed() {
-        return Math.copySign(arm_roller_in_speed, arm_roller_in_dir);
     }
 
     public double getArmPitchUpSpeed() {
@@ -337,7 +342,7 @@ public class Shooter implements ITableListener, PIDOutput{
     }
 
     public void raiseShooterRight() {
-        conf.getRightRaiseShooterTalon().set(getArmPitchUpSpeed());
+        conf.getRightRaiseShooterTalon().set(-getArmPitchUpSpeed());
     }
 
     public void raiseShooter() {
@@ -346,8 +351,7 @@ public class Shooter implements ITableListener, PIDOutput{
     }
 
     public void lowerShooterLeft() {
-        conf.getLeftRaiseShooterTalon().set(getArmPitchDownSpeed());
-
+        conf.getLeftRaiseShooterTalon().set(-getArmPitchDownSpeed());
     }
 
     public void lowerShooterRight() {
@@ -373,11 +377,13 @@ public class Shooter implements ITableListener, PIDOutput{
     }
 
     public void stopRaiserRight() {
-        conf.getRightRaiseShooterTalon().set(getArmPitchStaySpeed());
+        conf.getRightRaiseShooterTalon().set(0);
+        //conf.getRightRaiseShooterTalon().set(getArmPitchStaySpeed());
     }
 
     public void stopRaiserLeft() {
-        conf.getLeftRaiseShooterTalon().set(getArmPitchStaySpeed());
+        //conf.getLeftRaiseShooterTalon().set(getArmPitchStaySpeed());
+        conf.getLeftRaiseShooterTalon().set(0);
     }
 
     public void stopRaiser() {
@@ -391,6 +397,4 @@ public class Shooter implements ITableListener, PIDOutput{
         conf.getLeftRaiseShooterTalon().set(-output);
 
     }
-
-
 }

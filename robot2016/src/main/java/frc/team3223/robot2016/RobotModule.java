@@ -229,10 +229,10 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
         long elapsed = now - autoBegin;
 
-        if(elapsed < 1500) {
+        if(elapsed < 100) {
             shooter.offBearingShooter();
         }else{
-            shooter.stopRaiser();
+            shooter.lowerShooter();
         }
         if(500 < elapsed && elapsed < 3500) {
             simpleDrive.driveBackwards(.75);
@@ -333,10 +333,20 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
 
     @Override
+    public void testInit() {
+        conf.publishTestJoystickConfiguration();
+    }
+
+    @Override
     public void testPeriodic() {
         conf.toggleButtonsPeriodic();
         publishState();
 
+        if(conf.shouldResetEncoder()) {
+            conf.getSensorManager().getShooterRaiserEncoder().reset();
+        }
+
+        // left cam
         if(conf.testShouldAimUpLeft()) {
             shooter.raiseShooterLeft();
         }
@@ -351,6 +361,8 @@ public class RobotModule extends IterativeModule implements ITableListener {
         }else {
             conf.getLeftRaiseShooterTalon().set(0);
         }
+
+        // right cam
         if(conf.testShouldAimUpRight()) {
             shooter.raiseShooterRight();
         }
@@ -364,6 +376,24 @@ public class RobotModule extends IterativeModule implements ITableListener {
             shooter.stopRaiserRight();
         }else{
             conf.getRightRaiseShooterTalon().set(0);
+        }
+
+        // left shooter
+        if(conf.testShouldSlurpLeft()) {
+            shooter.slurpLeft();
+        }else if(conf.testShouldShootLeft()) {
+            shooter.shootLeft();
+        }else{
+            conf.getLeftShooterTalon().set(0);
+        }
+
+        // right shooter
+        if(conf.testShouldSlurpRight()) {
+            shooter.slurpRight();
+        }else if(conf.testShouldShootRight()) {
+            shooter.shootRight();
+        }else{
+            conf.getRightShooterTalon().set(0);
         }
     }
 

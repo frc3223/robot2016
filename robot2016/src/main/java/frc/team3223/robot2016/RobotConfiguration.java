@@ -29,6 +29,11 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private int recordButton = 6;
     private int resetEncoderButton = 10;
 
+    private int testOffBearingButton = 9;
+    private int testStayButton = 8;
+    private int testSlurpButton = 3;
+    private int testShootButton = 2;
+
     private int leftShooterChannel = 4;
     private int rightShooterChannel = 5;
     private int leftRaiseShooterChannel = 8;
@@ -98,7 +103,6 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         networkTable.putString("left_" + simpleDriveResetButton, "reset to tank drive mode");
     }
 
-
     public boolean shouldShoot() {
         return rightJoystick.getRawButton(shootButton);
     }
@@ -110,6 +114,26 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     public boolean shouldAimUp(){
         return leftJoystick.getRawButton(shooterUpButton);
     }
+
+    public void publishTestJoystickConfiguration(){
+        /* assigning joystick buttons to names to be displayed in the dashboard
+         * left = leftJoystick : right = rightJoystick
+         */
+        networkTable.putString("right_" + testShootButton, "test right shooter shoot");
+        networkTable.putString("left_" + testShootButton, "test left shooter shoot");
+        networkTable.putString("right_" + testSlurpButton, "test right shooter slurp");
+        networkTable.putString("left_" + testSlurpButton, "test left shooter slurp");
+        networkTable.putString("right_" + resetEncoderButton, "reset shooter encoder");
+        networkTable.putString("left_" + testOffBearingButton, "test left cam off bearing");
+        networkTable.putString("right_" + testOffBearingButton, "test right cam off bearing");
+        networkTable.putString("left_" + shooterUpButton, "test left cam aim up");
+        networkTable.putString("right_" + shooterUpButton, "test right cam aim up");
+        networkTable.putString("left_" + shooterDownButton, "test left cam aim down");
+        networkTable.putString("right_" + shooterDownButton, "test right cam aim down");
+        networkTable.putString("left_" + testStayButton, "test left cam stay at position");
+        networkTable.putString("right_" + testStayButton, "test right cam stay at position");
+    }
+
 
     public boolean testShouldAimUpLeft(){
         return leftJoystick.getRawButton(shooterUpButton);
@@ -128,19 +152,35 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     }
 
     public boolean testShouldOffBearingLeft(){
-        return leftJoystick.getRawButton(3);
+        return leftJoystick.getRawButton(testOffBearingButton);
     }
 
     public boolean testShouldOffBearingRight(){
-        return rightJoystick.getRawButton(3);
+        return rightJoystick.getRawButton(testOffBearingButton);
     }
 
     public boolean testShouldStayLeft(){
-        return leftJoystick.getRawButton(10);
+        return leftJoystick.getRawButton(testStayButton);
     }
 
     public boolean testShouldStayRight(){
-        return rightJoystick.getRawButton(10);
+        return rightJoystick.getRawButton(testStayButton);
+    }
+
+    public boolean testShouldShootLeft() {
+        return leftJoystick.getRawButton(testShootButton);
+    }
+
+    public boolean testShouldShootRight() {
+        return rightJoystick.getRawButton(testShootButton);
+    }
+
+    public boolean testShouldSlurpLeft() {
+        return leftJoystick.getRawButton(testSlurpButton);
+    }
+
+    public boolean testShouldSlurpRight() {
+        return rightJoystick.getRawButton(testSlurpButton);
     }
 
     public boolean shouldAimDown(){
