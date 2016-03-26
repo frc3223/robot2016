@@ -15,7 +15,7 @@ public class SillyAimAssist implements IDrive, ITableListener{
 
     public SillyAimAssist(RobotConfiguration conf) {
         this.conf = conf;
-        this.gyro = conf.getNavX();
+        this.gyro = conf.getSensorManager().getNavX();
     }
 
     public void drive() {

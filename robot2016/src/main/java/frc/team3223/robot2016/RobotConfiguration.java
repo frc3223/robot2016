@@ -1,10 +1,8 @@
 package frc.team3223.robot2016;
 
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import frc.team3223.drive.ISpeedControllerProvider;
-import frc.team3223.navx.INavX;
 import frc.team3223.util.ToggleButton;
 import jaci.openrio.toast.lib.registry.Registrar;
 
@@ -28,35 +26,35 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private int rotateToAngleButton = 9;
     private int polarDriveButton = 10;
     private int aimAssistButton = 11;
+    private int recordButton = 6;
+    private int resetEncoderButton = 10;
+
+    private int testOffBearingButton = 9;
+    private int testStayButton = 8;
+    private int testSlurpButton = 3;
+    private int testShootButton = 2;
 
     private int leftShooterChannel = 4;
     private int rightShooterChannel = 5;
-    private int rollerChannel = 6;
-    private int leftWindowMotorChannel = 7;
-    private int rightWindowMotorChannel = 8;
+    private int leftRaiseShooterChannel = 8;
+    private int rightRaiseShooterChannel = 7;
+    private int tailChannel = 9;
 
     private Talon leftShooterTalon;
     private Talon rightShooterTalon;
-    private Talon rollerTalon;
-    private Talon leftWindowMotorTalon;
-    private Talon rightWindowMotorTalon;
-    private DigitalInput shooterDownLimitSwitch;
+    private Talon leftRaiseShooterTalon;
+    private Talon rightRaiseShooterTalon;
 
-    private DigitalInput tailLimitSwitch1;
     private SpeedController tailMotor;
     private SensorManager sensorManager;
 
-
-
     public RobotConfiguration(NetworkTable networkTable){
         this.networkTable = networkTable;
-        shooterDownLimitSwitch = Registrar.digitalInput(0);
         initTalons();
         initJoysticks();
         initShooter();
         initButtonPublishers();
-        tailLimitSwitch1 = Registrar.digitalInput(1);
-        tailMotor = Registrar.victor(9);
+        tailMotor = Registrar.victor(tailChannel);
         sensorManager = new SensorManager();
     }
 
@@ -95,6 +93,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         networkTable.putString("right_" + shootButton, "fire");
         networkTable.putString("left_" + slurpButton, "get ball");
         networkTable.putString("right_" + simpleDriveReverseButton, "reverse tank drive");
+        networkTable.putString("right_" + recordButton, "start/stop recording");
+        networkTable.putString("right_" + resetEncoderButton, "reset shooter encoder");
         networkTable.putString("left_" + shooterUpButton, "aim up");
         networkTable.putString("left_" + shooterDownButton, "aim down");
         networkTable.putString("left_" + aimAssistButton, "aim assist drive mode (untested)");
@@ -102,7 +102,6 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         networkTable.putString("left_" + polarDriveButton, "polar fc tank drive mode (untested)");
         networkTable.putString("left_" + simpleDriveResetButton, "reset to tank drive mode");
     }
-
 
     public boolean shouldShoot() {
         return rightJoystick.getRawButton(shootButton);
@@ -114,6 +113,74 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
     public boolean shouldAimUp(){
         return leftJoystick.getRawButton(shooterUpButton);
+    }
+
+    public void publishTestJoystickConfiguration(){
+        /* assigning joystick buttons to names to be displayed in the dashboard
+         * left = leftJoystick : right = rightJoystick
+         */
+        networkTable.putString("right_" + testShootButton, "test right shooter shoot");
+        networkTable.putString("left_" + testShootButton, "test left shooter shoot");
+        networkTable.putString("right_" + testSlurpButton, "test right shooter slurp");
+        networkTable.putString("left_" + testSlurpButton, "test left shooter slurp");
+        networkTable.putString("right_" + resetEncoderButton, "reset shooter encoder");
+        networkTable.putString("left_" + testOffBearingButton, "test left cam off bearing");
+        networkTable.putString("right_" + testOffBearingButton, "test right cam off bearing");
+        networkTable.putString("left_" + shooterUpButton, "test left cam aim up");
+        networkTable.putString("right_" + shooterUpButton, "test right cam aim up");
+        networkTable.putString("left_" + shooterDownButton, "test left cam aim down");
+        networkTable.putString("right_" + shooterDownButton, "test right cam aim down");
+        networkTable.putString("left_" + testStayButton, "test left cam stay at position");
+        networkTable.putString("right_" + testStayButton, "test right cam stay at position");
+    }
+
+
+    public boolean testShouldAimUpLeft(){
+        return leftJoystick.getRawButton(shooterUpButton);
+    }
+
+    public boolean testShouldAimUpRight(){
+        return rightJoystick.getRawButton(shooterUpButton);
+    }
+
+    public boolean testShouldAimDownLeft(){
+        return leftJoystick.getRawButton(shooterDownButton);
+    }
+
+    public boolean testShouldAimDownRight(){
+        return rightJoystick.getRawButton(shooterDownButton);
+    }
+
+    public boolean testShouldOffBearingLeft(){
+        return leftJoystick.getRawButton(testOffBearingButton);
+    }
+
+    public boolean testShouldOffBearingRight(){
+        return rightJoystick.getRawButton(testOffBearingButton);
+    }
+
+    public boolean testShouldStayLeft(){
+        return leftJoystick.getRawButton(testStayButton);
+    }
+
+    public boolean testShouldStayRight(){
+        return rightJoystick.getRawButton(testStayButton);
+    }
+
+    public boolean testShouldShootLeft() {
+        return leftJoystick.getRawButton(testShootButton);
+    }
+
+    public boolean testShouldShootRight() {
+        return rightJoystick.getRawButton(testShootButton);
+    }
+
+    public boolean testShouldSlurpLeft() {
+        return leftJoystick.getRawButton(testSlurpButton);
+    }
+
+    public boolean testShouldSlurpRight() {
+        return rightJoystick.getRawButton(testSlurpButton);
     }
 
     public boolean shouldAimDown(){
@@ -148,9 +215,8 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     public void initShooter(){
         this.leftShooterTalon = Registrar.talon(leftShooterChannel);
         this.rightShooterTalon = Registrar.talon(rightShooterChannel);
-        this.rollerTalon = Registrar.talon(rollerChannel);
-        this.leftWindowMotorTalon = Registrar.talon(leftWindowMotorChannel);
-        this.rightWindowMotorTalon = Registrar.talon(rightWindowMotorChannel);
+        this.leftRaiseShooterTalon = Registrar.talon(leftRaiseShooterChannel);
+        this.rightRaiseShooterTalon = Registrar.talon(rightRaiseShooterChannel);
     }
 
     @Override
@@ -197,16 +263,12 @@ public class RobotConfiguration implements ISpeedControllerProvider {
         return rightShooterTalon;
     }
 
-    public Talon getRollerTalon() {
-        return rollerTalon;
+    public Talon getLeftRaiseShooterTalon() {
+        return leftRaiseShooterTalon;
     }
 
-    public Talon getLeftWindowMotorTalon() {
-        return leftWindowMotorTalon;
-    }
-
-    public Talon getRightWindowMotorTalon() {
-        return rightWindowMotorTalon;
+    public Talon getRightRaiseShooterTalon() {
+        return rightRaiseShooterTalon;
     }
 
     public Joystick getLeftJoystick() {
@@ -235,29 +297,27 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     }
 
     public double getShooterPitch() {
-        return sensorManager.getShooterGyro().getAngle()-sensorManager.getNavX().getRoll();
-        //return 0-sensorManager.getNavX().getRoll();
+        int encoderValue = sensorManager.getShooterRaiserEncoder().get();
+        return encoderValue;
     }
 
-    public Gyro getShooterGyro() {
-        return sensorManager.getShooterGyro();
+    public SensorManager getSensorManager() {
+        return sensorManager;
     }
-
-    public INavX getNavX() {
-        return sensorManager.getNavX();
-    }
-
-    public DigitalInput getShooterDownLimitSwitch() {
-        return shooterDownLimitSwitch;
-    }
-    public DigitalInput getTailLimitSwitch1() {return tailLimitSwitch1;}
 
     public SpeedController getTailMotor() {return tailMotor;}
 
-    public void stopMotors() {
-        getFrontLeftTalon().set(0);
-        getFrontRightTalon().set(0);
-        getRearLeftTalon().set(0);
-        getRearLeftTalon().set(0);
+    public ToggleButton makeRecordToggle() {
+
+
+        return new ToggleButton(getRightJoystick(), recordButton);
+    }
+
+    public boolean shouldResetEncoder() {
+        return (getRightJoystick().getRawButton(resetEncoderButton));
+    }
+
+    public ToggleButton make180Toggle() {
+        return new ToggleButton(getRightJoystick(), 11);
     }
 }
