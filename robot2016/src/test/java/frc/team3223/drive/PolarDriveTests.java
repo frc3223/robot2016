@@ -8,7 +8,7 @@ import java.io.*;
 
 public class PolarDriveTests {
 
-    public void assertAlmostEqual(double expected, double actual){
+    public static void assertAlmostEqual(double expected, double actual){
         Assert.assertEquals(expected, actual, 0.0001);
     }
 

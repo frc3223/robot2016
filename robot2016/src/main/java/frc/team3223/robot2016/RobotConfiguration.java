@@ -17,6 +17,11 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     private Joystick leftJoystick;
     private Joystick rightJoystick;
 
+    private int frontRightDriveChannel = 0;
+    private int backRightDriveChannel = 1;
+    private int frontLeftDriveChannel = 2;
+    private int backLeftDriveChannel = 3;
+
     private int shootButton = 3;
     private int slurpButton = 3;
     private int shooterUpButton = 4;
@@ -237,22 +242,22 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
     @Override
     public Talon getFrontLeftTalon() {
-        return talons.get(2);
+        return talons.get(frontLeftDriveChannel);
     }
 
     @Override
     public Talon getRearLeftTalon() {
-        return talons.get(3);
+        return talons.get(backLeftDriveChannel);
     }
 
     @Override
     public Talon getFrontRightTalon() {
-        return talons.get(0);
+        return talons.get(frontRightDriveChannel);
     }
 
     @Override
     public Talon getRearRightTalon() {
-        return talons.get(1);
+        return talons.get(backRightDriveChannel);
     }
 
     public Talon getLeftShooterTalon() {

@@ -10,6 +10,7 @@ import frc.team3223.autonomous.IAutonomous;
 import frc.team3223.drive.*;
 import frc.team3223.navx.INavX;
 import frc.team3223.navx.NavXRegistrar;
+import frc.team3223.util.TimeProvider;
 import frc.team3223.util.ToggleButton;
 import jaci.openrio.toast.core.ToastBootstrap;
 import jaci.openrio.toast.lib.log.Logger;
@@ -39,6 +40,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     RobotConfiguration conf;
     Recorder recorder;
     Replayer replayer;
+    RotationProfiler rotationProfiler;
 
     boolean rotating = false;
     double rotateAngle;
@@ -217,11 +219,16 @@ public class RobotModule extends IterativeModule implements ITableListener {
         //replayer.setup("auto");
         //replayer.start();
         autoBegin = System.currentTimeMillis();
+        rotationProfiler = new RotationProfiler(new TimeProvider());
+        rotationProfiler.compute(90);
+        rotationProfiler.start();
     }
 
     @Override
     public void autonomousPeriodic() {
-        driveBackwardsAuto();
+        //driveBackwardsAuto();
+        //rotationProfiler.drive(simpleDrive);
+        simpleDrive.rotate(0.375);
     }
 
     public void driveBackwardsAuto() {
