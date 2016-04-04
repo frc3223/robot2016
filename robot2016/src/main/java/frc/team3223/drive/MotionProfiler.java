@@ -20,21 +20,21 @@ public class MotionProfiler{
 
     public MotionProfiler(String path, int profileType){
         try{
-            Scanner s = new Scanner(new File(path));
-            if(profileType == ARRAY_PROFILE_TYPE) {
-                int numSteps = 0;
-                while (s.hasNext()) numSteps++;
-                this.profile = new double[numSteps];
-                s.reset();
-                numSteps = 0;
-                while (s.hasNextInt()) {
-                    this.profile[numSteps] = s.nextInt();
-                    numSteps++;
+            try (Scanner s = new Scanner(new File(path))) {
+                if(profileType == ARRAY_PROFILE_TYPE) {
+                    int numSteps = 0;
+                    while (s.hasNext()) numSteps++;
+                    this.profile = new double[numSteps];
+                    s.reset();
+                    numSteps = 0;
+                    while (s.hasNextInt()) {
+                        this.profile[numSteps] = s.nextInt();
+                        numSteps++;
+                    }
                 }
-
-            }
-            else if(profileType ==  STEPS_POWER_PROFILE_TYPE){
-
+                else if(profileType ==  STEPS_POWER_PROFILE_TYPE){
+                  
+                }
             }
         }
         catch(FileNotFoundException e){

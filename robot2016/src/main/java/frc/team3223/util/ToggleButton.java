@@ -2,8 +2,6 @@ package frc.team3223.util;
 
 import edu.wpi.first.wpilibj.Joystick;
 
-import java.util.function.Consumer;
-
 /**
  * Execute an action once when a button is pressed or released.
  * Action sequence looks like:

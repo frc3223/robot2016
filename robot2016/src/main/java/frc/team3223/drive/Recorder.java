@@ -45,28 +45,30 @@ public class Recorder {
 
         if(System.currentTimeMillis() - startTime > 15000) {
             recording = false;
-            Formatter f = new Formatter();
-            long currentTime = System.currentTimeMillis();
-            long diff = currentTime - startTime;
-            long seconds = diff / 1000;
-            long secondsOfMinute = seconds % 60;
-            long minutes = seconds / 60;
-            f.format("stopped recording '%s' at %d:%02d",
+            try (Formatter f = new Formatter()) {
+                long currentTime = System.currentTimeMillis();
+                long diff = currentTime - startTime;
+                long seconds = diff / 1000;
+                long secondsOfMinute = seconds % 60;
+                long minutes = seconds / 60;
+                f.format("stopped recording '%s' at %d:%02d",
                     context.getName(), minutes, secondsOfMinute);
-            notRecordingLabel = f.toString();
+                notRecordingLabel = f.toString();
+            }
         }
     }
 
     public String getStatusLabel() {
         if(isRecording()) {
-            Formatter f = new Formatter();
-            long currentTime = System.currentTimeMillis();
-            long diff = currentTime - startTime;
-            long seconds = diff / 1000;
-            long secondsOfMinute = seconds % 60;
-            long minutes = seconds / 60;
-            f.format("recording '%s' %d:%02d", context.getName(), minutes, secondsOfMinute);
-            return f.toString();
+            try (Formatter f = new Formatter()) {
+                long currentTime = System.currentTimeMillis();
+                long diff = currentTime - startTime;
+                long seconds = diff / 1000;
+                long secondsOfMinute = seconds % 60;
+                long minutes = seconds / 60;
+                f.format("recording '%s' %d:%02d", context.getName(), minutes, secondsOfMinute);
+                return f.toString();
+            }
         }else{
             return notRecordingLabel;
         }

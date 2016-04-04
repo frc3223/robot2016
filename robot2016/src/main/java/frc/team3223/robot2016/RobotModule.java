@@ -1,15 +1,10 @@
 package frc.team3223.robot2016;
 
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
-import frc.team3223.autonomous.DriveForward;
 import frc.team3223.autonomous.DriveToHighGoal;
 import frc.team3223.autonomous.IAutonomous;
 import frc.team3223.drive.*;
-import frc.team3223.navx.INavX;
-import frc.team3223.navx.NavXRegistrar;
 import frc.team3223.util.ToggleButton;
 import jaci.openrio.toast.core.ToastBootstrap;
 import jaci.openrio.toast.lib.log.Logger;
@@ -33,7 +28,6 @@ public class RobotModule extends IterativeModule implements ITableListener {
     Map<DriveMode, IDrive> driveModes;
     Map<AutonomousMode, IAutonomous> autonomousModes;
     DriveToHighGoal driveToHighGoal;
-    DriveForward driveForward;
     AutonomousMode currentAutonomousMode;
     SillyAimAssist aimAssist;
     RobotConfiguration conf;
@@ -311,6 +305,9 @@ public class RobotModule extends IterativeModule implements ITableListener {
                     break;
                 case PolarFCTank:
                     //ptDrive.driveSingleFieldCentric();
+                    break;
+                case PolarFCTankRev:
+                    //ptDriveRev.driveSingleFieldCentric();
                     break;
                 case AimAssist:
                     //aimAssist.drive();

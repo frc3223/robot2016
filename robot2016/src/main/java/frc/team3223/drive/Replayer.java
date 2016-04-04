@@ -1,14 +1,12 @@
 package frc.team3223.drive;
 
 import frc.team3223.robot2016.RobotConfiguration;
-import frc.team3223.util.Pair;
 import jaci.openrio.toast.core.io.Storage;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Replayer {
@@ -64,8 +62,7 @@ public class Replayer {
 
     public void setup(String name) {
         File target_file = Storage.highestPriority("system/recorder/" + name + ".csv");
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(target_file));
+        try (BufferedReader reader = new BufferedReader(new FileReader(target_file))) {
             String line;
             boolean header = true;
             int timeIndex = 0;

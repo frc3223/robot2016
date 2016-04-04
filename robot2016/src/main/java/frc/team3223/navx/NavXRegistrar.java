@@ -2,7 +2,6 @@ package frc.team3223.navx;
 
 import edu.wpi.first.wpilibj.PIDSourceType;
 import jaci.openrio.toast.core.ToastBootstrap;
-import jaci.openrio.toast.lib.module.ToastModule;
 import jaci.openrio.toast.lib.registry.Registrar;
 
 import java.util.function.Supplier;
