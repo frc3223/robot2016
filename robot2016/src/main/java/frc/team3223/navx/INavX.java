@@ -5,29 +5,31 @@ import edu.wpi.first.wpilibj.interfaces.Gyro;
 
 // don't know why AHRS doesn't implement Gyro itself..
 public interface INavX extends Gyro, PIDSource {
-    float getYaw();
-    float getPitch();
-    float getRoll();
+  float getYaw();
 
-    float getWorldLinearAccelX();
+  float getPitch();
 
-    float getWorldLinearAccelY();
+  float getRoll();
 
-    float getWorldLinearAccelZ();
+  float getWorldLinearAccelX();
 
-    float getVelocityX();
+  float getWorldLinearAccelY();
 
-    float getVelocityY();
+  float getWorldLinearAccelZ();
 
-    float getVelocityZ();
+  float getVelocityX();
 
-    float getDisplacementX();
+  float getVelocityY();
 
-    float getDisplacementY();
+  float getVelocityZ();
 
-    float getDisplacementZ();
+  float getDisplacementX();
 
-    float getFusedHeading();
+  float getDisplacementY();
 
-    double getAngle();
+  float getDisplacementZ();
+
+  float getFusedHeading();
+
+  double getAngle();
 }

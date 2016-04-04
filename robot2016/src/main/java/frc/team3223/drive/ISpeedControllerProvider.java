@@ -5,11 +5,15 @@ import edu.wpi.first.wpilibj.SpeedController;
 import java.util.Iterator;
 
 public interface ISpeedControllerProvider {
-    Iterator<SpeedController> getLeftMotors();
-    Iterator<SpeedController> getRightMotors();
+  Iterator<SpeedController> getLeftMotors();
 
-    SpeedController getFrontLeftTalon();
-    SpeedController getRearLeftTalon();
-    SpeedController getFrontRightTalon();
-    SpeedController getRearRightTalon();
+  Iterator<SpeedController> getRightMotors();
+
+  SpeedController getFrontLeftTalon();
+
+  SpeedController getRearLeftTalon();
+
+  SpeedController getFrontRightTalon();
+
+  SpeedController getRearRightTalon();
 }

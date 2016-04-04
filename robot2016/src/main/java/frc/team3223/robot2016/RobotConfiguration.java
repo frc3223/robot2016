@@ -11,313 +11,317 @@ import java.util.Iterator;
 
 public class RobotConfiguration implements ISpeedControllerProvider {
 
-    ArrayList<Talon> talons;
-    ArrayList<ToggleButton> buttonPublishers;
-    NetworkTable networkTable;
-    private Joystick leftJoystick;
-    private Joystick rightJoystick;
+  ArrayList<Talon> talons;
+  ArrayList<ToggleButton> buttonPublishers;
+  NetworkTable networkTable;
+  private Joystick leftJoystick;
+  private Joystick rightJoystick;
 
-    private int shootButton = 3;
-    private int slurpButton = 3;
-    private int shooterUpButton = 4;
-    private int shooterDownButton = 5;
-    private int simpleDriveReverseButton = 8;
-    private int simpleDriveResetButton = 8;
-    private int rotateToAngleButton = 9;
-    private int polarDriveButton = 10;
-    private int aimAssistButton = 11;
-    private int recordButton = 6;
-    private int resetEncoderButton = 10;
+  private int shootButton = 3;
+  private int slurpButton = 3;
+  private int shooterUpButton = 4;
+  private int shooterDownButton = 5;
+  private int simpleDriveReverseButton = 8;
+  private int simpleDriveResetButton = 8;
+  private int rotateToAngleButton = 9;
+  private int polarDriveButton = 10;
+  private int aimAssistButton = 11;
+  private int recordButton = 6;
+  private int resetEncoderButton = 10;
 
-    private int testOffBearingButton = 9;
-    private int testStayButton = 8;
-    private int testSlurpButton = 3;
-    private int testShootButton = 2;
+  private int testOffBearingButton = 9;
+  private int testStayButton = 8;
+  private int testSlurpButton = 3;
+  private int testShootButton = 2;
 
-    private int leftShooterChannel = 4;
-    private int rightShooterChannel = 5;
-    private int leftRaiseShooterChannel = 8;
-    private int rightRaiseShooterChannel = 7;
-    private int tailChannel = 9;
+  private int leftShooterChannel = 4;
+  private int rightShooterChannel = 5;
+  private int leftRaiseShooterChannel = 8;
+  private int rightRaiseShooterChannel = 7;
+  private int tailChannel = 9;
 
-    private Talon leftShooterTalon;
-    private Talon rightShooterTalon;
-    private Talon leftRaiseShooterTalon;
-    private Talon rightRaiseShooterTalon;
+  private Talon leftShooterTalon;
+  private Talon rightShooterTalon;
+  private Talon leftRaiseShooterTalon;
+  private Talon rightRaiseShooterTalon;
 
-    private SpeedController tailMotor;
-    private SensorManager sensorManager;
+  private SpeedController tailMotor;
+  private SensorManager sensorManager;
 
-    public RobotConfiguration(NetworkTable networkTable){
-        this.networkTable = networkTable;
-        initTalons();
-        initJoysticks();
-        initShooter();
-        initButtonPublishers();
-        tailMotor = Registrar.victor(tailChannel);
-        sensorManager = new SensorManager();
+  public RobotConfiguration(NetworkTable networkTable) {
+    this.networkTable = networkTable;
+    initTalons();
+    initJoysticks();
+    initShooter();
+    initButtonPublishers();
+    tailMotor = Registrar.victor(tailChannel);
+    sensorManager = new SensorManager();
+  }
+
+  private void initButtonPublishers() {
+    buttonPublishers = new ArrayList<>();
+    for (int i = 1; i <= 11; i++) {
+      ToggleButton leftToggle = new ToggleButton(leftJoystick, i);
+      leftToggle.onToggleOn((j, b) -> {
+        networkTable.putBoolean("left_" + b + "_pressed", true);
+      });
+      leftToggle.onToggleOff((j, b) -> {
+        networkTable.putBoolean("left_" + b + "_pressed", false);
+      });
+      buttonPublishers.add(leftToggle);
+      ToggleButton rightToggle = new ToggleButton(rightJoystick, i);
+      rightToggle.onToggleOn((j, b) -> {
+        networkTable.putBoolean("right_" + b + "_pressed", true);
+      });
+      rightToggle.onToggleOff((j, b) -> {
+        networkTable.putBoolean("right_" + b + "_pressed", false);
+      });
+      buttonPublishers.add(rightToggle);
     }
+  }
 
-    private void initButtonPublishers() {
-        buttonPublishers = new ArrayList<>();
-        for(int i = 1; i <= 11; i++) {
-            ToggleButton leftToggle = new ToggleButton(leftJoystick, i);
-            leftToggle.onToggleOn((j, b) -> {
-                networkTable.putBoolean("left_" + b + "_pressed", true);
-            });
-            leftToggle.onToggleOff((j, b) -> {
-                networkTable.putBoolean("left_" + b + "_pressed", false);
-            });
-            buttonPublishers.add(leftToggle);
-            ToggleButton rightToggle = new ToggleButton(rightJoystick, i);
-            rightToggle.onToggleOn((j, b) -> {
-                networkTable.putBoolean("right_" + b + "_pressed", true);
-            });
-            rightToggle.onToggleOff((j, b) -> {
-                networkTable.putBoolean("right_" + b + "_pressed", false);
-            });
-            buttonPublishers.add(rightToggle);
-        }
+  public void toggleButtonsPeriodic() {
+    buttonPublishers.forEach(toggleButton -> {
+      toggleButton.periodic();
+    });
+  }
+
+  public void publishJoystickConfiguration() {
+    /*
+     * assigning joystick buttons to names to be displayed in the dashboard left = leftJoystick :
+     * right = rightJoystick
+     */
+    networkTable.putString("right_" + shootButton, "fire");
+    networkTable.putString("left_" + slurpButton, "get ball");
+    networkTable.putString("right_" + simpleDriveReverseButton, "reverse tank drive");
+    networkTable.putString("right_" + recordButton, "start/stop recording");
+    networkTable.putString("right_" + resetEncoderButton, "reset shooter encoder");
+    networkTable.putString("left_" + shooterUpButton, "aim up");
+    networkTable.putString("left_" + shooterDownButton, "aim down");
+    networkTable.putString("left_" + aimAssistButton, "aim assist drive mode (untested)");
+    networkTable.putString("left_" + rotateToAngleButton, "rotate to angle drive mode (untested)");
+    networkTable.putString("left_" + polarDriveButton, "polar fc tank drive mode (untested)");
+    networkTable.putString("left_" + simpleDriveResetButton, "reset to tank drive mode");
+  }
+
+  public boolean shouldShoot() {
+    return rightJoystick.getRawButton(shootButton);
+  }
+
+  public boolean shouldSlurp() {
+    return leftJoystick.getRawButton(slurpButton);
+  }
+
+  public boolean shouldAimUp() {
+    return leftJoystick.getRawButton(shooterUpButton);
+  }
+
+  public void publishTestJoystickConfiguration() {
+    /*
+     * assigning joystick buttons to names to be displayed in the dashboard left = leftJoystick :
+     * right = rightJoystick
+     */
+    networkTable.putString("right_" + testShootButton, "test right shooter shoot");
+    networkTable.putString("left_" + testShootButton, "test left shooter shoot");
+    networkTable.putString("right_" + testSlurpButton, "test right shooter slurp");
+    networkTable.putString("left_" + testSlurpButton, "test left shooter slurp");
+    networkTable.putString("right_" + resetEncoderButton, "reset shooter encoder");
+    networkTable.putString("left_" + testOffBearingButton, "test left cam off bearing");
+    networkTable.putString("right_" + testOffBearingButton, "test right cam off bearing");
+    networkTable.putString("left_" + shooterUpButton, "test left cam aim up");
+    networkTable.putString("right_" + shooterUpButton, "test right cam aim up");
+    networkTable.putString("left_" + shooterDownButton, "test left cam aim down");
+    networkTable.putString("right_" + shooterDownButton, "test right cam aim down");
+    networkTable.putString("left_" + testStayButton, "test left cam stay at position");
+    networkTable.putString("right_" + testStayButton, "test right cam stay at position");
+  }
+
+
+  public boolean testShouldAimUpLeft() {
+    return leftJoystick.getRawButton(shooterUpButton);
+  }
+
+  public boolean testShouldAimUpRight() {
+    return rightJoystick.getRawButton(shooterUpButton);
+  }
+
+  public boolean testShouldAimDownLeft() {
+    return leftJoystick.getRawButton(shooterDownButton);
+  }
+
+  public boolean testShouldAimDownRight() {
+    return rightJoystick.getRawButton(shooterDownButton);
+  }
+
+  public boolean testShouldOffBearingLeft() {
+    return leftJoystick.getRawButton(testOffBearingButton);
+  }
+
+  public boolean testShouldOffBearingRight() {
+    return rightJoystick.getRawButton(testOffBearingButton);
+  }
+
+  public boolean testShouldStayLeft() {
+    return leftJoystick.getRawButton(testStayButton);
+  }
+
+  public boolean testShouldStayRight() {
+    return rightJoystick.getRawButton(testStayButton);
+  }
+
+  public boolean testShouldShootLeft() {
+    return leftJoystick.getRawButton(testShootButton);
+  }
+
+  public boolean testShouldShootRight() {
+    return rightJoystick.getRawButton(testShootButton);
+  }
+
+  public boolean testShouldSlurpLeft() {
+    return leftJoystick.getRawButton(testSlurpButton);
+  }
+
+  public boolean testShouldSlurpRight() {
+    return rightJoystick.getRawButton(testSlurpButton);
+  }
+
+  public boolean shouldAimDown() {
+    return leftJoystick.getRawButton(shooterDownButton);
+  }
+
+  public ToggleButton makeRotateToAngleToggle() {
+    return new ToggleButton(getLeftJoystick(), rotateToAngleButton);
+  }
+
+  private void initJoysticks() {
+    leftJoystick = new Joystick(0);
+    rightJoystick = new Joystick(1);
+  }
+
+
+  private void initTalons() {
+    int n = 6;
+    talons = new ArrayList<Talon>(n);
+    for (int j = 0; j < n; j++) {
+      Talon talon = Registrar.talon(j);
+      talons.add(talon);
     }
+  }
 
-    public void toggleButtonsPeriodic() {
-        buttonPublishers.forEach(toggleButton -> {
-            toggleButton.periodic();
-        });
-    }
+  public void feedumTalons() {
+    talons.forEach(talon -> {
+      talon.Feed();
+    });
+  }
 
-    public void publishJoystickConfiguration(){
-        /* assigning joystick buttons to names to be displayed in the dashboard
-         * left = leftJoystick : right = rightJoystick
-         */
-        networkTable.putString("right_" + shootButton, "fire");
-        networkTable.putString("left_" + slurpButton, "get ball");
-        networkTable.putString("right_" + simpleDriveReverseButton, "reverse tank drive");
-        networkTable.putString("right_" + recordButton, "start/stop recording");
-        networkTable.putString("right_" + resetEncoderButton, "reset shooter encoder");
-        networkTable.putString("left_" + shooterUpButton, "aim up");
-        networkTable.putString("left_" + shooterDownButton, "aim down");
-        networkTable.putString("left_" + aimAssistButton, "aim assist drive mode (untested)");
-        networkTable.putString("left_" + rotateToAngleButton, "rotate to angle drive mode (untested)");
-        networkTable.putString("left_" + polarDriveButton, "polar fc tank drive mode (untested)");
-        networkTable.putString("left_" + simpleDriveResetButton, "reset to tank drive mode");
-    }
+  public void initShooter() {
+    this.leftShooterTalon = Registrar.talon(leftShooterChannel);
+    this.rightShooterTalon = Registrar.talon(rightShooterChannel);
+    this.leftRaiseShooterTalon = Registrar.talon(leftRaiseShooterChannel);
+    this.rightRaiseShooterTalon = Registrar.talon(rightRaiseShooterChannel);
+  }
 
-    public boolean shouldShoot() {
-        return rightJoystick.getRawButton(shootButton);
-    }
+  @Override
+  public Iterator<SpeedController> getLeftMotors() {
+    ArrayList<SpeedController> grr = new ArrayList<>(2);
+    grr.add(getFrontLeftTalon());
+    grr.add(getRearLeftTalon());
+    return grr.iterator();
+  }
 
-    public boolean shouldSlurp() {
-        return leftJoystick.getRawButton(slurpButton);
-    }
+  @Override
+  public Iterator<SpeedController> getRightMotors() {
+    ArrayList<SpeedController> grr = new ArrayList<>(2);
+    grr.add(getFrontRightTalon());
+    grr.add(getRearRightTalon());
+    return grr.iterator();
+  }
 
-    public boolean shouldAimUp(){
-        return leftJoystick.getRawButton(shooterUpButton);
-    }
+  @Override
+  public Talon getFrontLeftTalon() {
+    return talons.get(2);
+  }
 
-    public void publishTestJoystickConfiguration(){
-        /* assigning joystick buttons to names to be displayed in the dashboard
-         * left = leftJoystick : right = rightJoystick
-         */
-        networkTable.putString("right_" + testShootButton, "test right shooter shoot");
-        networkTable.putString("left_" + testShootButton, "test left shooter shoot");
-        networkTable.putString("right_" + testSlurpButton, "test right shooter slurp");
-        networkTable.putString("left_" + testSlurpButton, "test left shooter slurp");
-        networkTable.putString("right_" + resetEncoderButton, "reset shooter encoder");
-        networkTable.putString("left_" + testOffBearingButton, "test left cam off bearing");
-        networkTable.putString("right_" + testOffBearingButton, "test right cam off bearing");
-        networkTable.putString("left_" + shooterUpButton, "test left cam aim up");
-        networkTable.putString("right_" + shooterUpButton, "test right cam aim up");
-        networkTable.putString("left_" + shooterDownButton, "test left cam aim down");
-        networkTable.putString("right_" + shooterDownButton, "test right cam aim down");
-        networkTable.putString("left_" + testStayButton, "test left cam stay at position");
-        networkTable.putString("right_" + testStayButton, "test right cam stay at position");
-    }
+  @Override
+  public Talon getRearLeftTalon() {
+    return talons.get(3);
+  }
 
+  @Override
+  public Talon getFrontRightTalon() {
+    return talons.get(0);
+  }
 
-    public boolean testShouldAimUpLeft(){
-        return leftJoystick.getRawButton(shooterUpButton);
-    }
+  @Override
+  public Talon getRearRightTalon() {
+    return talons.get(1);
+  }
 
-    public boolean testShouldAimUpRight(){
-        return rightJoystick.getRawButton(shooterUpButton);
-    }
+  public Talon getLeftShooterTalon() {
+    return leftShooterTalon;
+  }
 
-    public boolean testShouldAimDownLeft(){
-        return leftJoystick.getRawButton(shooterDownButton);
-    }
+  public Talon getRightShooterTalon() {
+    return rightShooterTalon;
+  }
 
-    public boolean testShouldAimDownRight(){
-        return rightJoystick.getRawButton(shooterDownButton);
-    }
+  public Talon getLeftRaiseShooterTalon() {
+    return leftRaiseShooterTalon;
+  }
 
-    public boolean testShouldOffBearingLeft(){
-        return leftJoystick.getRawButton(testOffBearingButton);
-    }
+  public Talon getRightRaiseShooterTalon() {
+    return rightRaiseShooterTalon;
+  }
 
-    public boolean testShouldOffBearingRight(){
-        return rightJoystick.getRawButton(testOffBearingButton);
-    }
+  public Joystick getLeftJoystick() {
+    return leftJoystick;
+  }
 
-    public boolean testShouldStayLeft(){
-        return leftJoystick.getRawButton(testStayButton);
-    }
+  public Joystick getRightJoystick() {
+    return rightJoystick;
+  }
 
-    public boolean testShouldStayRight(){
-        return rightJoystick.getRawButton(testStayButton);
-    }
-
-    public boolean testShouldShootLeft() {
-        return leftJoystick.getRawButton(testShootButton);
-    }
-
-    public boolean testShouldShootRight() {
-        return rightJoystick.getRawButton(testShootButton);
-    }
-
-    public boolean testShouldSlurpLeft() {
-        return leftJoystick.getRawButton(testSlurpButton);
-    }
-
-    public boolean testShouldSlurpRight() {
-        return rightJoystick.getRawButton(testSlurpButton);
-    }
-
-    public boolean shouldAimDown(){
-        return leftJoystick.getRawButton(shooterDownButton);
-    }
-
-    public ToggleButton makeRotateToAngleToggle() {
-        return new ToggleButton(getLeftJoystick(), rotateToAngleButton);
-    }
-
-    private void initJoysticks() {
-        leftJoystick = new Joystick(0);
-        rightJoystick = new Joystick(1);
-    }
+  public ToggleButton makeAimAssistToggle() {
+    return new ToggleButton(leftJoystick, aimAssistButton);
+  }
 
 
-    private void initTalons() {
-        int n = 6;
-        talons = new ArrayList<Talon>(n);
-        for(int j = 0; j < n; j ++) {
-            Talon talon = Registrar.talon(j);
-            talons.add(talon);
-        }
-    }
+  public ToggleButton makePolarDriveToggle() {
+    return new ToggleButton(getLeftJoystick(), polarDriveButton);
+  }
 
-    public void feedumTalons() {
-        talons.forEach(talon -> {
-                talon.Feed();
-        });
-    }
+  public ToggleButton makeSimpleDriveResetToggle() {
+    return new ToggleButton(getLeftJoystick(), simpleDriveResetButton);
+  }
 
-    public void initShooter(){
-        this.leftShooterTalon = Registrar.talon(leftShooterChannel);
-        this.rightShooterTalon = Registrar.talon(rightShooterChannel);
-        this.leftRaiseShooterTalon = Registrar.talon(leftRaiseShooterChannel);
-        this.rightRaiseShooterTalon = Registrar.talon(rightRaiseShooterChannel);
-    }
+  public ToggleButton makeSimpleDriveReverseToggle() {
+    return new ToggleButton(getRightJoystick(), simpleDriveReverseButton);
+  }
 
-    @Override
-    public Iterator<SpeedController> getLeftMotors() {
-        ArrayList<SpeedController> grr = new ArrayList<>(2);
-        grr.add(getFrontLeftTalon());
-        grr.add(getRearLeftTalon());
-        return grr.iterator();
-    }
+  public double getShooterPitch() {
+    int encoderValue = sensorManager.getShooterRaiserEncoder().get();
+    return encoderValue;
+  }
 
-    @Override
-    public Iterator<SpeedController> getRightMotors() {
-        ArrayList<SpeedController> grr = new ArrayList<>(2);
-        grr.add(getFrontRightTalon());
-        grr.add(getRearRightTalon());
-        return grr.iterator();
-    }
+  public SensorManager getSensorManager() {
+    return sensorManager;
+  }
 
-    @Override
-    public Talon getFrontLeftTalon() {
-        return talons.get(2);
-    }
+  public SpeedController getTailMotor() {
+    return tailMotor;
+  }
 
-    @Override
-    public Talon getRearLeftTalon() {
-        return talons.get(3);
-    }
-
-    @Override
-    public Talon getFrontRightTalon() {
-        return talons.get(0);
-    }
-
-    @Override
-    public Talon getRearRightTalon() {
-        return talons.get(1);
-    }
-
-    public Talon getLeftShooterTalon() {
-        return leftShooterTalon;
-    }
-
-    public Talon getRightShooterTalon() {
-        return rightShooterTalon;
-    }
-
-    public Talon getLeftRaiseShooterTalon() {
-        return leftRaiseShooterTalon;
-    }
-
-    public Talon getRightRaiseShooterTalon() {
-        return rightRaiseShooterTalon;
-    }
-
-    public Joystick getLeftJoystick() {
-        return leftJoystick;
-    }
-
-    public Joystick getRightJoystick() {
-        return rightJoystick;
-    }
-
-    public ToggleButton makeAimAssistToggle() {
-        return new ToggleButton(leftJoystick, aimAssistButton);
-    }
+  public ToggleButton makeRecordToggle() {
 
 
-    public ToggleButton makePolarDriveToggle() {
-        return new ToggleButton(getLeftJoystick(), polarDriveButton);
-    }
+    return new ToggleButton(getRightJoystick(), recordButton);
+  }
 
-    public ToggleButton makeSimpleDriveResetToggle() {
-        return new ToggleButton(getLeftJoystick(), simpleDriveResetButton);
-    }
+  public boolean shouldResetEncoder() {
+    return (getRightJoystick().getRawButton(resetEncoderButton));
+  }
 
-    public ToggleButton makeSimpleDriveReverseToggle() {
-        return new ToggleButton(getRightJoystick(), simpleDriveReverseButton);
-    }
-
-    public double getShooterPitch() {
-        int encoderValue = sensorManager.getShooterRaiserEncoder().get();
-        return encoderValue;
-    }
-
-    public SensorManager getSensorManager() {
-        return sensorManager;
-    }
-
-    public SpeedController getTailMotor() {return tailMotor;}
-
-    public ToggleButton makeRecordToggle() {
-
-
-        return new ToggleButton(getRightJoystick(), recordButton);
-    }
-
-    public boolean shouldResetEncoder() {
-        return (getRightJoystick().getRawButton(resetEncoderButton));
-    }
-
-    public ToggleButton make180Toggle() {
-        return new ToggleButton(getRightJoystick(), 11);
-    }
+  public ToggleButton make180Toggle() {
+    return new ToggleButton(getRightJoystick(), 11);
+  }
 }
