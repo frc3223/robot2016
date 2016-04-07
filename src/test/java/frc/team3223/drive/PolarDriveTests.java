@@ -51,13 +51,11 @@ public class PolarDriveTests {
   private void outputRightThrustCsv() {
     File file = new File("right.csv");
     System.out.println("writing to " + file.getAbsolutePath());
-    try (
-      FileOutputStream out = new FileOutputStream("right.csv");
-      OutputStreamWriter bw = new OutputStreamWriter(out);
-      BufferedWriter bout = new BufferedWriter(bw)
-    ) {
+    try (FileOutputStream out = new FileOutputStream("right.csv");
+        OutputStreamWriter bw = new OutputStreamWriter(out);
+        BufferedWriter bout = new BufferedWriter(bw)) {
       for (double th = -180.0; th < 180.0; th += 1.0) {
-          Pair<Double, Double> pair = PolarTankDrive.polarToThrust(th, 0.5);
+        Pair<Double, Double> pair = PolarTankDrive.polarToThrust(th, 0.5);
         double rightThrust = pair.snd;
         bout.write(Double.toString(th));
         bout.write(",");

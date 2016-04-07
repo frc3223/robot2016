@@ -6,7 +6,7 @@ import frc.team3223.robot2016.RobotConfiguration;
 import java.util.Formatter;
 
 public class Recorder {
-  RecorderContext context;
+  public RecorderContext context;
   private RobotConfiguration conf;
   private long startTime;
   boolean recording = false;

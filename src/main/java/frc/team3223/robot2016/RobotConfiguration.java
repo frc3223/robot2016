@@ -22,22 +22,29 @@ public class RobotConfiguration implements ISpeedControllerProvider {
   private int frontLeftDriveChannel = 2;
   private int backLeftDriveChannel = 3;
 
-  private int shootButton = 3;
+  // left joystick
   private int slurpButton = 3;
   private int shooterUpButton = 4;
   private int shooterDownButton = 5;
-  private int simpleDriveReverseButton = 8;
   private int simpleDriveResetButton = 8;
   private int rotateToAngleButton = 9;
   private int polarDriveButton = 10;
   private int aimAssistButton = 11;
-  private int recordButton = 6;
-  private int resetEncoderButton = 10;
 
   private int testOffBearingButton = 9;
   private int testStayButton = 8;
+  
+  // right joystick
+  private int shootButton = 3;
+  private int simpleDriveReverseButton = 8;
+  private int recordButton = 6;
+  private int resetEncoderButton = 10;
+  private int manualTongueButton = 11;
+
   private int testSlurpButton = 3;
   private int testShootButton = 2;
+  
+  // end buttons
 
   private int leftShooterChannel = 4;
   private int rightShooterChannel = 5;
@@ -101,12 +108,17 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     networkTable.putString("right_" + simpleDriveReverseButton, "reverse tank drive");
     networkTable.putString("right_" + recordButton, "start/stop recording");
     networkTable.putString("right_" + resetEncoderButton, "reset shooter encoder");
+    networkTable.putString("right_" + manualTongueButton, "manual drive tongue");
     networkTable.putString("left_" + shooterUpButton, "aim up");
     networkTable.putString("left_" + shooterDownButton, "aim down");
     networkTable.putString("left_" + aimAssistButton, "aim assist drive mode (untested)");
     networkTable.putString("left_" + rotateToAngleButton, "rotate to angle drive mode (untested)");
     networkTable.putString("left_" + polarDriveButton, "polar fc tank drive mode (untested)");
     networkTable.putString("left_" + simpleDriveResetButton, "reset to tank drive mode");
+  }
+  
+  public boolean shouldSpinTongue() {
+    return rightJoystick.getRawButton(manualTongueButton);
   }
 
   public boolean shouldShoot() {
@@ -312,7 +324,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     return sensorManager;
   }
 
-  public SpeedController getTailMotor() {
+  public SpeedController getTongueMotor() {
     return tailMotor;
   }
 

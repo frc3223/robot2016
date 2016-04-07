@@ -189,11 +189,11 @@ public class Shooter implements ITableListener, PIDOutput {
   }
 
   public void tailOut() {
-    conf.getTailMotor().set(getTailOutSpeed());
+    conf.getTongueMotor().set(getTailOutSpeed());
   }
 
   public void tailIn() {
-    conf.getTailMotor().set(getTailInSpeed());
+    conf.getTongueMotor().set(getTailInSpeed());
   }
 
   public void slurpLeft() {
@@ -215,7 +215,7 @@ public class Shooter implements ITableListener, PIDOutput {
   }
 
   public void stopTail() {
-    conf.getTailMotor().set(0.);
+    conf.getTongueMotor().set(0.);
   }
 
   public double getShootSpeed() {

@@ -16,8 +16,8 @@ import java.util.function.Supplier;
  * <li>Translate joystick inputs to polar radius and angle</li>
  * <li>Field Centric control: E.g. push down on joystick means robot drives toward the operator end
  * of the arena</li>
- * <li>Turn threshold: When the robot's heading is within this distance of the desired heading,
- * turn robot while moving forward, otherwise rotate the robot in place.</li>
+ * <li>Turn threshold: When the robot's heading is within this distance of the desired heading, turn
+ * robot while moving forward, otherwise rotate the robot in place.</li>
  */
 public class PolarTankDrive implements IDrive {
 

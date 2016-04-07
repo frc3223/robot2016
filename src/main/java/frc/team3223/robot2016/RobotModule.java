@@ -212,8 +212,11 @@ public class RobotModule extends IterativeModule implements ITableListener {
     // replayer.setup("auto");
     // replayer.start();
     autoBegin = System.currentTimeMillis();
+    recorder.setup("test");
+    recorder.context.add("p_velocity", () -> rotationProfiler.getVelocity());
+    recorder.startRecording();
     rotationProfiler = new RotationProfiler(new TimeProvider());
-    rotationProfiler.compute(90);
+    rotationProfiler.compute(-90);
     rotationProfiler.start();
   }
 
@@ -320,13 +323,6 @@ public class RobotModule extends IterativeModule implements ITableListener {
           break;
       }
     }
-
-    /*
-     * if(conf.shouldShoot()) { conf.getTailMotor().set(-1); }else if(conf.shouldSlurp()) {
-     * conf.getTailMotor().set(1);
-     * 
-     * }else{ conf.getTailMotor().set(0); }
-     */
   }
 
 

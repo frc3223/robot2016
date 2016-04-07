@@ -93,6 +93,14 @@ public class SimpleDrive implements IDrive {
     }
     drive.tankDrive(leftValue, rightValue, true);
   }
+  
+  public void driveRaw(double leftValue, double rightValue) {
+    if (networkTable != null) {
+      networkTable.putNumber("left", leftValue);
+      networkTable.putNumber("right", rightValue);
+    }
+    drive.tankDrive(leftValue, rightValue, false);
+  }
 
   public double getMaxSpeedModifier() {
     return maxSpeedModifier;
