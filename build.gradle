@@ -1,0 +1,45 @@
+
+buildscript {
+    repositories {
+        mavenCentral()
+            maven {
+                name = "GradleRIO"
+                    url = "http://dev.imjac.in/maven"
+            }
+    }
+  dependencies {
+      classpath group: 'jaci.openrio.gradle', name: 'GradleRIO', version: '+', classifier: 'Toast'			//Change this line if you wish to Update GradleRIO
+  }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin: 'GradleRIO'                                 //Apply the GradleRIO plugin
+
+repositories {
+  mavenLocal()
+  maven {
+    name = "Toast"
+    url = "http://dev.imjac.in/maven"
+  }
+}
+
+gradlerio.team = "3223"
+gradlerio.rioIP = "10.32.23.37"
+gradlerio.deployFile = "toast/modules/${archivesBaseName}.jar"
+
+configurations {
+    deployerJars
+}
+
+dependencies {
+    compile group: 'jaci.openrio.toast', name: 'Toast', version: '+'
+    compile fileTree(dir: 'libs', include: '*.jar')
+    toastLibrary fileTree(dir: 'libs/', include: '*.jar')
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.+'
+}
+
