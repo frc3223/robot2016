@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.tables.ITableListener;
 public class Shooter implements ITableListener, PIDOutput {
 
   public static enum State {
-    IDLE, SLURPING, SHOOTING_INIT, SHOOTING_TAIL_OUT, SHOOTING_TAIL_IN, SLURP_INIT, SHOOTING_TAIL_IN_TO_STOP
+    IDLE, SLURPING, SHOOTING_INIT, SHOOTING_ACTIVATION, DRIVE_TONGUE, SLURP_INIT, SHOOTING_TAIL_IN_TO_STOP
   }
 
   private State state = State.IDLE;
@@ -96,32 +96,27 @@ public class Shooter implements ITableListener, PIDOutput {
 
   public void teleopPeriodic() {
     long currentTime = System.currentTimeMillis();
-    long tailOscillationTime = 0;
-    long tailRetractTime = 0;
+    long tongueOscillationTime = 1000;
+    long spinUpTime = 100;
 
     switch (this.getState()) {
       case IDLE:
         stopShooter();
-        stopTail();
+        stopTongue();
 
         if (conf.shouldSlurp()) {
-          this.setStateAndStart(State.SLURP_INIT, currentTime);
+          this.setStateAndStart(State.SLURPING, currentTime);
         }
         if (conf.shouldShoot()) {
           this.setStateAndStart(State.SHOOTING_INIT, currentTime);
         }
-        break;
-      case SLURP_INIT:
-        stopShooter();
-        tailIn();
-
-        if (currentTime - stateStartTime > tailRetractTime) {
-          this.setStateAndStart(State.SLURPING, currentTime);
+        if(conf.shouldSpinTongue()) {
+          this.setStateAndStart(State.DRIVE_TONGUE, currentTime);
         }
         break;
       case SLURPING:
         slurp();
-        tailIn();
+        stopTongue();
 
         if (!conf.shouldSlurp()) {
           this.setStateAndStart(State.IDLE, currentTime);
@@ -129,38 +124,33 @@ public class Shooter implements ITableListener, PIDOutput {
         break;
       case SHOOTING_INIT:
         shoot();
-        tailIn();
+        stopTongue();
 
         if (!conf.shouldShoot()) {
           this.setStateAndStart(State.IDLE, currentTime);
-        } else if (currentTime - stateStartTime > tailRetractTime) {
-          this.setStateAndStart(State.SHOOTING_TAIL_OUT, currentTime);
+        } else if (currentTime - stateStartTime > spinUpTime) {
+          this.setStateAndStart(State.SHOOTING_ACTIVATION, currentTime);
         }
         break;
-      case SHOOTING_TAIL_OUT:
+      case SHOOTING_ACTIVATION:
         shoot();
-        tailOut();
+        rotateTongue();
 
         if (!conf.shouldShoot()) {
-          this.setStateAndStart(State.SHOOTING_TAIL_IN_TO_STOP, currentTime);
-        } else if (currentTime - stateStartTime > tailOscillationTime) {
-          this.setStateAndStart(State.SHOOTING_TAIL_IN, currentTime);
+          this.setStateAndStart(State.IDLE, currentTime);
+        } else if (currentTime - stateStartTime > tongueOscillationTime) {
+          if(!conf.shouldShoot()) {
+            this.setStateAndStart(State.IDLE, currentTime);
+          }else{
+            this.setStateAndStart(State.SHOOTING_ACTIVATION, currentTime);
+          }
         }
         break;
-      case SHOOTING_TAIL_IN:
-        shoot();
-        tailIn();
-
-        if (!conf.shouldShoot()) {
-          this.setStateAndStart(State.SHOOTING_TAIL_IN_TO_STOP, currentTime);
-        } else if (currentTime - stateStartTime > tailOscillationTime) {
-          this.setStateAndStart(State.SHOOTING_TAIL_OUT, currentTime);
-        }
-        break;
-      case SHOOTING_TAIL_IN_TO_STOP:
+      case DRIVE_TONGUE:
         stopShooter();
-        tailIn();
-        if (currentTime - stateStartTime > tailOscillationTime) {
+        rotateTongue();
+
+        if (!conf.shouldSpinTongue()) {
           this.setStateAndStart(State.IDLE, currentTime);
         }
         break;
@@ -188,10 +178,6 @@ public class Shooter implements ITableListener, PIDOutput {
     shootRight();
   }
 
-  public void tailOut() {
-    conf.getTongueMotor().set(getTailOutSpeed());
-  }
-
   public void tailIn() {
     conf.getTongueMotor().set(getTailInSpeed());
   }
@@ -214,7 +200,7 @@ public class Shooter implements ITableListener, PIDOutput {
     conf.getLeftShooterTalon().set(0.);
   }
 
-  public void stopTail() {
+  public void stopTongue() {
     conf.getTongueMotor().set(0.);
   }
 
@@ -385,6 +371,10 @@ public class Shooter implements ITableListener, PIDOutput {
   public void stopRaiserLeft() {
     // conf.getLeftRaiseShooterTalon().set(getArmPitchStaySpeed());
     conf.getLeftRaiseShooterTalon().set(0);
+  }
+
+  public void rotateTongue() {
+    conf.getTongueMotor().set(1);
   }
 
   public void stopRaiser() {
