@@ -31,7 +31,7 @@ public class Shooter implements ITableListener, PIDOutput {
   public double slurpDirection = -1;
   public double shootSpeed = 1;
   public double shootDirection = -1;
-  public double arm_stay_speed = 0.75;
+  public double arm_stay_speed = 0.5;
 
   double arm_pitch_up_speed = 1.0;
   double arm_pitch_up_dir = 1;
@@ -163,7 +163,11 @@ public class Shooter implements ITableListener, PIDOutput {
           this.setStateAndStart(State.IDLE, currentTime);
         }
         break;
+      default:
+        stopShooter();
+        stopTongue();
     }
+
 
     if (conf.shouldAimUp()) {
       raiseShooter();
@@ -337,6 +341,7 @@ public class Shooter implements ITableListener, PIDOutput {
     networkTable.putNumber("arm_pitch_down_speed", getArmPitchDownSpeed());
     networkTable.putNumber("arm_roller_out_speed", getArmRollerOutSpeed());
     networkTable.putNumber("arm_roller_in_speed", getArmRollerInSpeed());
+    networkTable.putString("shoot_state", state.toString());
   }
 
   public void raiseShooterLeft() {
@@ -400,7 +405,7 @@ public class Shooter implements ITableListener, PIDOutput {
   }
 
   public void holdRaiserRight() {
-    conf.getRightRaiseShooterTalon().set(getArmPitchStaySpeed());
+    conf.getRightRaiseShooterTalon().set(-getArmPitchStaySpeed());
   }
 
   public void holdRaiser() {
