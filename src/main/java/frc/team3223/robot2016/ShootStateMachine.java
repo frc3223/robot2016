@@ -100,6 +100,10 @@ public class ShootStateMachine {
                     this.setStateAndStart(State.IDLE, currentTime);
                 }
                 break;
+			default:
+				shooter.stopShooter();
+				shooter.stopTongue();
+				break;
         }
     }
 }

@@ -51,7 +51,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
   private int rightShooterChannel = 5;
   private int leftRaiseShooterChannel = 8;
   private int rightRaiseShooterChannel = 7;
-  private int tailChannel = 9;
+  private int tailChannel = 6;
 
   private Talon leftShooterTalon;
   private Talon rightShooterTalon;
