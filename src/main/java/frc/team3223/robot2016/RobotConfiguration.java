@@ -338,7 +338,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     return (getRightJoystick().getRawButton(resetEncoderButton));
   }
 
-  public ToggleButton make180Toggle() {
-    return new ToggleButton(getRightJoystick(), 11);
+  public boolean isTongueBack() {
+    return !sensorManager.getTongueLimitSwitch().get();
   }
 }

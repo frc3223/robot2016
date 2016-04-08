@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.tables.ITableListener;
 public class Shooter implements ITableListener, PIDOutput {
 
   public static enum State {
-    IDLE, SLURPING, SHOOTING_INIT, SHOOTING_ACTIVATION, DRIVE_TONGUE, SLURP_INIT, SHOOTING_TAIL_IN_TO_STOP
+    IDLE, SLURPING, SHOOTING_INIT, SHOOTING_ACTIVATION, DRIVE_TONGUE, SLURP_INIT, SHOOTING_WAIT_FOR_NOT_BACK, SHOOTING_TAIL_IN_TO_STOP
   }
 
   private State state = State.IDLE;
@@ -27,7 +27,7 @@ public class Shooter implements ITableListener, PIDOutput {
     this.stateStartTime = currentTime;
   }
 
-  public double slurpSpeed = .6;
+  public double slurpSpeed = 1;
   public double slurpDirection = -1;
   public double shootSpeed = 1;
   public double shootDirection = -1;
@@ -126,9 +126,18 @@ public class Shooter implements ITableListener, PIDOutput {
         shoot();
         stopTongue();
 
-        if (!conf.shouldShoot()) {
-          this.setStateAndStart(State.IDLE, currentTime);
-        } else if (currentTime - stateStartTime > spinUpTime) {
+        if (currentTime - stateStartTime > spinUpTime) {
+          if(conf.isTongueBack()) {
+            this.setStateAndStart(State.SHOOTING_WAIT_FOR_NOT_BACK, currentTime);
+          }else {
+            this.setStateAndStart(State.SHOOTING_ACTIVATION, currentTime);
+          }
+        }
+        break;
+      case SHOOTING_WAIT_FOR_NOT_BACK:
+        shoot();
+        rotateTongue();
+        if(!conf.isTongueBack()) {
           this.setStateAndStart(State.SHOOTING_ACTIVATION, currentTime);
         }
         break;
@@ -136,13 +145,11 @@ public class Shooter implements ITableListener, PIDOutput {
         shoot();
         rotateTongue();
 
-        if (!conf.shouldShoot()) {
-          this.setStateAndStart(State.IDLE, currentTime);
-        } else if (currentTime - stateStartTime > tongueOscillationTime) {
+        if (conf.isTongueBack()) {
           if(!conf.shouldShoot()) {
             this.setStateAndStart(State.IDLE, currentTime);
           }else{
-            this.setStateAndStart(State.SHOOTING_ACTIVATION, currentTime);
+            this.setStateAndStart(State.SHOOTING_WAIT_FOR_NOT_BACK, currentTime);
           }
         }
         break;

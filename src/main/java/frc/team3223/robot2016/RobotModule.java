@@ -91,18 +91,6 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     toggleButtons.add(recordbtn);
 
-    ToggleButton rotateBtn = conf.make180Toggle();
-    rotateBtn.onToggleOn((jb, n) -> {
-      if (rotating) {
-        rotating = false;
-      } else {
-        rotating = true;
-        rotateAngle =
-            PolarTankDrive.normalizeDegrees(conf.getSensorManager().getNavX().getAngle() + 200);
-      }
-    });
-    toggleButtons.add(rotateBtn);
-
     conf.publishJoystickConfiguration();
   }
 
@@ -413,6 +401,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
       networkTable.putNumber("shooter_pitch", conf.getShooterPitch());
     }
     networkTable.putString("driveMode", driveMode.toString());
+    networkTable.putBoolean("tongueLimit", conf.isTongueBack());
   }
 
   @Override
