@@ -35,6 +35,9 @@ public class RobotModule extends IterativeModule implements ITableListener {
   Recorder recorder;
   Replayer replayer;
   RotationProfiler rotationProfiler;
+  HighGoalStates highGoalState;
+
+  long highGoalStateStartTime;
 
   boolean rotating = false;
   double rotateAngle;
@@ -47,8 +50,13 @@ public class RobotModule extends IterativeModule implements ITableListener {
   boolean shouldRotate = false;
 
   double desiredHeading = 0.00;
+  int desiredEncoderValue;
 
   long clock;
+
+  double target_dist = 1000;
+  double target_theta = 1000;
+  double target_theta_v = 1000;
 
   @Override
   public String getModuleName() {
@@ -212,6 +220,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     rotationProfiler = new RotationProfiler(new TimeProvider());
     rotationProfiler.compute(-90);
     rotationProfiler.start();
+    highGoalState = HighGoalStates.START;
   }
 
   @Override
@@ -234,6 +243,119 @@ public class RobotModule extends IterativeModule implements ITableListener {
     } else {
       simpleDrive.drive(0, 0);
     }
+  }
+
+  public void setState(HighGoalStates state) {
+    this.highGoalState = state;
+  }
+
+  public void setStateAndStart(HighGoalStates state, long currentTime) {
+    setState(state);
+    this.highGoalStateStartTime = currentTime;
+  }
+
+  public int distanceToEncoderValue(double distance) {
+    double[][] vSignalMapping = new double[][] {
+            new double[] {2000, -5.0},
+            new double[] {3000, -70.0}
+    };
+    double encoderValue = 0;
+    boolean broken = false;
+
+    if (distance < vSignalMapping[0][0]) {
+      return 0;
+    }
+    for (int i = 1; i < vSignalMapping.length; i++) {
+      double distance1 = vSignalMapping[i - 1][0];
+      double distance2 = vSignalMapping[i][0];
+      double encoderValue1 = vSignalMapping[i - 1][1];
+      double encoderValue2 = vSignalMapping[i][1];
+      if (distance <= distance2) {
+        encoderValue = encoderValue1 + (encoderValue2 - encoderValue1) * (distance - distance1) / (distance2 - distance1);
+        broken = true;
+        break;
+      }
+    }
+    if (!broken) {
+      encoderValue = -171;
+    }
+
+    return (int) encoderValue;
+  }
+
+  public void highGoalAuto() {
+    long now = System.currentTimeMillis();
+
+    long elapsed = now - autoBegin;
+
+    if (highGoalState == HighGoalStates.START) {
+      simpleDrive.drive(0, 0);
+      if (elapsed > 500) {
+        this.setStateAndStart(HighGoalStates.DRIVING_BACKWARDS, now);
+      }
+    } else if (highGoalState == HighGoalStates.DRIVING_BACKWARDS) {
+      simpleDrive.driveBackwards(.75);
+      if (elapsed > 3500) {
+        this.setStateAndStart(HighGoalStates.CALCULATE_ROTATION, now);
+      }
+    } else if (highGoalState == HighGoalStates.CALCULATE_ROTATION) {
+      rotationProfiler.start();
+      this.setStateAndStart(HighGoalStates.ROTATING, now);
+    } else if (highGoalState == HighGoalStates.ROTATING) {
+      rotationProfiler.drive(simpleDrive);
+      if (rotationProfiler.isDone()) {
+        this.setStateAndStart(HighGoalStates.CALCULATE_ROTATION_CORRECTION, now);
+      }
+    } else if (highGoalState == HighGoalStates.CALCULATE_ROTATION_CORRECTION) {
+      double heading = conf.getSensorManager().getNavX().getAngle();
+      this.desiredHeading = heading + target_theta;
+      //if can't see target, done
+      if (target_theta > -30 && target_theta < 30) {
+        this.setStateAndStart(HighGoalStates.DONE, now);
+      } else {
+        this.setStateAndStart(HighGoalStates.ROTATE_TO_TARGET, now);
+      }
+    } else if (highGoalState == HighGoalStates.ROTATE_TO_TARGET){
+      double heading = conf.getSensorManager().getNavX().getAngle();
+      double relativeHeading = desiredHeading - heading;
+      if (-1.5 < relativeHeading && relativeHeading < 1.5) {
+        this.setStateAndStart(HighGoalStates.RAISE_AND_DROP_SHOOTER_INIT, now);
+      } else {
+        if (relativeHeading > 0) {
+          rotationProfiler.rotate(2, simpleDrive);
+        } else {
+          rotationProfiler.rotate(-2, simpleDrive);
+        }
+      }
+    } else if (highGoalState == HighGoalStates.RAISE_AND_DROP_SHOOTER_INIT) {
+      desiredEncoderValue = distanceToEncoderValue(target_dist);
+      if (conf.getShooterPitch() > desiredEncoderValue) {
+        this.setStateAndStart(HighGoalStates.DROP_SHOOTER, now);
+      } else {
+        this.setStateAndStart(HighGoalStates.RAISE_SHOOTER, now);
+      }
+    } else if (highGoalState == HighGoalStates.DROP_SHOOTER) {
+      shooter.lowerShooter();
+      if (conf.getShooterPitch() < desiredEncoderValue) {
+        this.setStateAndStart(HighGoalStates.RAISE_SHOOTER, now);
+      }
+    } else if (highGoalState == HighGoalStates.RAISE_SHOOTER) {
+      shooter.raiseShooter();
+      if (conf.getShooterPitch() > desiredEncoderValue) {
+        this.setStateAndStart(HighGoalStates.SHOOTING_INIT, now);
+      }
+    } else if (highGoalState == HighGoalStates.SHOOTING_INIT) {
+      shooter.getShootStateMachine().setStateAndStart(ShootStateMachine.State.SHOOTING_INIT, now);
+      this.setStateAndStart(HighGoalStates.SHOOTING, now);
+    } else if (highGoalState == HighGoalStates.SHOOTING) {
+      shooter.getShootStateMachine().periodic();
+      if (shooter.getShootStateMachine().getState().equals(ShootStateMachine.State.IDLE)) {
+        this.setStateAndStart(HighGoalStates.DONE, now);
+      }
+    } else {
+      simpleDrive.drive(0, 0);
+    }
+
   }
 
   public void portcullisAuto() {
@@ -442,6 +564,18 @@ public class RobotModule extends IterativeModule implements ITableListener {
             e.printStackTrace();
           }
         }
+        break;
+      }
+      case "target_dist": {
+        target_dist = (double) value;
+        break;
+      }
+      case "target_theta": {
+        target_theta = (double) value;
+        break;
+      }
+      case "target_theta_v": {
+        target_theta_v = (double) value;
         break;
       }
     }

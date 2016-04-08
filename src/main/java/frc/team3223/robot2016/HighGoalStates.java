@@ -1,5 +1,16 @@
 package frc.team3223.robot2016;
 
 public enum HighGoalStates {
-  DrivingBackwards, CalculateRotation, Rotating, CalculateRotationCorrection, RotateToTarget, Done;
+  START,
+  DRIVING_BACKWARDS,
+  CALCULATE_ROTATION,
+  ROTATING,
+  CALCULATE_ROTATION_CORRECTION,
+  ROTATE_TO_TARGET,
+  RAISE_AND_DROP_SHOOTER_INIT,
+  DROP_SHOOTER,
+  RAISE_SHOOTER,
+  SHOOTING_INIT,
+  SHOOTING,
+  DONE;
 }

@@ -8,25 +8,6 @@ import edu.wpi.first.wpilibj.tables.ITableListener;
 
 public class Shooter implements ITableListener, PIDOutput {
 
-  public static enum State {
-    IDLE, SLURPING, SHOOTING_INIT, SHOOTING_ACTIVATION, DRIVE_TONGUE, SLURP_INIT, SHOOTING_WAIT_FOR_NOT_BACK, SHOOTING_TAIL_IN_TO_STOP
-  }
-
-  private State state = State.IDLE;
-
-  public State getState() {
-    return state;
-  }
-
-  public void setState(State state) {
-    this.state = state;
-  }
-
-  public void setStateAndStart(State state, long currentTime) {
-    setState(state);
-    this.stateStartTime = currentTime;
-  }
-
   public double slurpSpeed = 1;
   public double slurpDirection = -1;
   public double shootSpeed = 1;
@@ -49,7 +30,6 @@ public class Shooter implements ITableListener, PIDOutput {
   double tail_out_dir = -1;
   private RobotConfiguration conf;
   private NetworkTable networkTable;
-
   boolean shouldHoldShooterUp;
   boolean hasDesiredPitch = false;
   String desiredPitchName;
@@ -57,6 +37,8 @@ public class Shooter implements ITableListener, PIDOutput {
   int pitchPublishIncrement = 0;
 
   private long stateStartTime;
+
+  ShootStateMachine shootStateMachine;
 
   PIDController raiseController;
   double kP = 0.03;
@@ -75,6 +57,7 @@ public class Shooter implements ITableListener, PIDOutput {
 
     this.conf = conf;
     this.networkTable = networkTable;
+    this.shootStateMachine = new ShootStateMachine(this, conf);
     this.shouldHoldShooterUp = false;
     /*
      * this.raiseController = new PIDController(kP, kI, kD, kF,
@@ -82,6 +65,10 @@ public class Shooter implements ITableListener, PIDOutput {
      * this.raiseController.setOutputRange(-1.0, 1.0); this.raiseController.setContinuous(true);
      * this.raiseController.setSetpoint(raiseSetpoint); this.raiseController.enable();
      */
+  }
+
+  public ShootStateMachine getShootStateMachine() {
+    return this.shootStateMachine;
   }
 
   public void makePIDController() {
@@ -97,74 +84,7 @@ public class Shooter implements ITableListener, PIDOutput {
   }
 
   public void teleopPeriodic() {
-    long currentTime = System.currentTimeMillis();
-    long tongueOscillationTime = 1000;
-    long spinUpTime = 100;
-
-    switch (this.getState()) {
-      case IDLE:
-        stopShooter();
-        stopTongue();
-
-        if (conf.shouldSlurp()) {
-          this.setStateAndStart(State.SLURPING, currentTime);
-        }
-        if (conf.shouldShoot()) {
-          this.setStateAndStart(State.SHOOTING_INIT, currentTime);
-        }
-        if(conf.shouldSpinTongue()) {
-          this.setStateAndStart(State.DRIVE_TONGUE, currentTime);
-        }
-        break;
-      case SLURPING:
-        slurp();
-        stopTongue();
-
-        if (!conf.shouldSlurp()) {
-          this.setStateAndStart(State.IDLE, currentTime);
-        }
-        break;
-      case SHOOTING_INIT:
-        shoot();
-        stopTongue();
-
-        if (currentTime - stateStartTime > spinUpTime) {
-          if(conf.isTongueBack()) {
-            this.setStateAndStart(State.SHOOTING_WAIT_FOR_NOT_BACK, currentTime);
-          }else {
-            this.setStateAndStart(State.SHOOTING_ACTIVATION, currentTime);
-          }
-        }
-        break;
-      case SHOOTING_WAIT_FOR_NOT_BACK:
-        shoot();
-        rotateTongue();
-        if(!conf.isTongueBack()) {
-          this.setStateAndStart(State.SHOOTING_ACTIVATION, currentTime);
-        }
-        break;
-      case SHOOTING_ACTIVATION:
-        shoot();
-        rotateTongue();
-
-        if (conf.isTongueBack()) {
-          if(!conf.shouldShoot()) {
-            this.setStateAndStart(State.IDLE, currentTime);
-          }else{
-            this.setStateAndStart(State.SHOOTING_WAIT_FOR_NOT_BACK, currentTime);
-          }
-        }
-        break;
-      case DRIVE_TONGUE:
-        stopShooter();
-        rotateTongue();
-
-        if (!conf.shouldSpinTongue()) {
-          this.setStateAndStart(State.IDLE, currentTime);
-        }
-        break;
-    }
-
+    shootStateMachine.periodic();
     if (conf.shouldAimUp()) {
       raiseShooter();
     } else if (conf.shouldAimDown()) {

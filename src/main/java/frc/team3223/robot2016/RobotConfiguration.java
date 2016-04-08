@@ -317,7 +317,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     return new ToggleButton(getRightJoystick(), simpleDriveReverseButton);
   }
 
-  public double getShooterPitch() {
+  public int getShooterPitch() {
     int encoderValue = sensorManager.getShooterRaiserEncoder().get();
     return encoderValue;
   }

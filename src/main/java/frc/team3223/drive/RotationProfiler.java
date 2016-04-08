@@ -116,4 +116,10 @@ public class RotationProfiler {
     long elapsedTime = timeProvider.getCurrentTimeMillis() - startTime;
     return elapsedTime > (accelDuration + peakDuration + decelDuration);
   }
+
+  public void rotate(int i, SimpleDrive simpleDrive) {
+    double leftSignal = velocityToSignal(i);
+    double rightSignal = velocityToSignal(i);
+    simpleDrive.driveRaw(leftSignal, rightSignal);
+  }
 }
