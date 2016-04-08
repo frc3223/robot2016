@@ -91,6 +91,12 @@ public class RobotModule extends IterativeModule implements ITableListener {
 
     toggleButtons.add(recordbtn);
 
+    ToggleButton holdShooterUpToggle = conf.makeHoldShooterUpToggle();
+    holdShooterUpToggle.onToggleOn((jb, n) -> {
+      shooter.toggleHoldMode();
+    });
+    toggleButtons.add(holdShooterUpToggle);
+
     conf.publishJoystickConfiguration();
   }
 
@@ -337,9 +343,9 @@ public class RobotModule extends IterativeModule implements ITableListener {
     } else if (conf.testShouldOffBearingLeft()) {
       shooter.offBearingShooterLeft();
     } else if (conf.testShouldStayLeft()) {
-      shooter.stopRaiserLeft();
+      shooter.holdRaiserLeft();
     } else {
-      conf.getLeftRaiseShooterTalon().set(0);
+      shooter.stopRaiserLeft();
     }
 
     // right cam
@@ -350,9 +356,9 @@ public class RobotModule extends IterativeModule implements ITableListener {
     } else if (conf.testShouldOffBearingRight()) {
       shooter.offBearingShooterRight();
     } else if (conf.testShouldStayRight()) {
-      shooter.stopRaiserRight();
+      shooter.holdRaiserRight();
     } else {
-      conf.getRightRaiseShooterTalon().set(0);
+      shooter.stopRaiserRight();
     }
 
     // left shooter
@@ -361,7 +367,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     } else if (conf.testShouldShootLeft()) {
       shooter.shootLeft();
     } else {
-      conf.getLeftShooterTalon().set(0);
+      shooter.stopShooterLeft();
     }
 
     // right shooter
@@ -370,7 +376,7 @@ public class RobotModule extends IterativeModule implements ITableListener {
     } else if (conf.testShouldShootRight()) {
       shooter.shootRight();
     } else {
-      conf.getRightShooterTalon().set(0);
+      shooter.stopShooterRight();
     }
   }
 

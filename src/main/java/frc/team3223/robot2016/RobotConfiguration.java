@@ -36,6 +36,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
   
   // right joystick
   private int shootButton = 3;
+  private int holdShooterUpButton = 4;
   private int simpleDriveReverseButton = 8;
   private int recordButton = 6;
   private int resetEncoderButton = 10;
@@ -43,7 +44,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
   private int testSlurpButton = 3;
   private int testShootButton = 2;
-  
+
   // end buttons
 
   private int leftShooterChannel = 4;
@@ -109,6 +110,7 @@ public class RobotConfiguration implements ISpeedControllerProvider {
     networkTable.putString("right_" + recordButton, "start/stop recording");
     networkTable.putString("right_" + resetEncoderButton, "reset shooter encoder");
     networkTable.putString("right_" + manualTongueButton, "manual drive tongue");
+    networkTable.putString("right_" + holdShooterUpButton, "toggle hold shooter at position");
     networkTable.putString("left_" + shooterUpButton, "aim up");
     networkTable.putString("left_" + shooterDownButton, "aim down");
     networkTable.putString("left_" + aimAssistButton, "aim assist drive mode (untested)");
@@ -340,5 +342,9 @@ public class RobotConfiguration implements ISpeedControllerProvider {
 
   public boolean isTongueBack() {
     return !sensorManager.getTongueLimitSwitch().get();
+  }
+
+  public ToggleButton makeHoldShooterUpToggle() {
+    return new ToggleButton(getRightJoystick(), holdShooterUpButton);
   }
 }

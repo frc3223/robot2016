@@ -50,6 +50,7 @@ public class Shooter implements ITableListener, PIDOutput {
   private RobotConfiguration conf;
   private NetworkTable networkTable;
 
+  boolean shouldHoldShooterUp;
   boolean hasDesiredPitch = false;
   String desiredPitchName;
   int pitchState = 0;
@@ -74,6 +75,7 @@ public class Shooter implements ITableListener, PIDOutput {
 
     this.conf = conf;
     this.networkTable = networkTable;
+    this.shouldHoldShooterUp = false;
     /*
      * this.raiseController = new PIDController(kP, kI, kD, kF,
      * conf.getSensorManager().getShooterRaiserEncoder(), this);
@@ -167,6 +169,8 @@ public class Shooter implements ITableListener, PIDOutput {
       raiseShooter();
     } else if (conf.shouldAimDown()) {
       lowerShooter();
+    } else if(shouldHoldShooterUp) {
+      holdRaiser();
     } else {
       stopRaiser();
     }
@@ -185,10 +189,6 @@ public class Shooter implements ITableListener, PIDOutput {
     shootRight();
   }
 
-  public void tailIn() {
-    conf.getTongueMotor().set(getTailInSpeed());
-  }
-
   public void slurpLeft() {
     conf.getLeftShooterTalon().set(-getSlurpSpeed());
   }
@@ -202,9 +202,17 @@ public class Shooter implements ITableListener, PIDOutput {
     slurpRight();
   }
 
-  public void stopShooter() {
-    conf.getRightShooterTalon().set(0.);
+  public void stopShooterLeft() {
     conf.getLeftShooterTalon().set(0.);
+  }
+
+  public void stopShooterRight() {
+    conf.getRightShooterTalon().set(0.);
+  }
+
+  public void stopShooter() {
+    stopShooterLeft();
+    stopShooterRight();
   }
 
   public void stopTongue() {
@@ -372,11 +380,9 @@ public class Shooter implements ITableListener, PIDOutput {
 
   public void stopRaiserRight() {
     conf.getRightRaiseShooterTalon().set(0);
-    // conf.getRightRaiseShooterTalon().set(getArmPitchStaySpeed());
   }
 
   public void stopRaiserLeft() {
-    // conf.getLeftRaiseShooterTalon().set(getArmPitchStaySpeed());
     conf.getLeftRaiseShooterTalon().set(0);
   }
 
@@ -389,10 +395,28 @@ public class Shooter implements ITableListener, PIDOutput {
     stopRaiserRight();
   }
 
+  public void holdRaiserLeft() {
+    conf.getLeftRaiseShooterTalon().set(getArmPitchStaySpeed());
+  }
+
+  public void holdRaiserRight() {
+    conf.getRightRaiseShooterTalon().set(getArmPitchStaySpeed());
+  }
+
+  public void holdRaiser() {
+    holdRaiserLeft();
+    holdRaiserRight();
+  }
+
   @Override
   public void pidWrite(double output) {
     conf.getRightRaiseShooterTalon().set(output);
     conf.getLeftRaiseShooterTalon().set(-output);
 
+  }
+
+
+  public void toggleHoldMode() {
+    shouldHoldShooterUp = !shouldHoldShooterUp;
   }
 }
